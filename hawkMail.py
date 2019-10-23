@@ -121,7 +121,7 @@ month_trnsx = df.loc[df.index >= month_start]
 monthly_html = month_trnsx.to_html()
 
 html = ''
-html += '<!DOCTYPE html><html lang="en"><head>SAR Leaver Found! </head><body><div class="card is-centered pie-chart-card"><span class="badge mantis">Good</span><div class="pie-chart">'
+html += '<!DOCTYPE html><html lang="en"><head><link href="https://uiux.s3.amazonaws.com/style-guide/css/style-guide.css" rel="stylesheet"> </head><body><div class="card is-centered pie-chart-card"><span class="badge mantis">Good</span><div class="pie-chart">'
 html +=  '<div class="pie-chart-svg">'
 html +=   '<svg width="100%" height="100%" viewBox="0 0 42 42" class="donut">'
 html +=    '<circle class="donut-hole" cx="21" cy="21" r="15.91549430918954" fill="#fff"></circle>'
