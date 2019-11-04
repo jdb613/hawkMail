@@ -11,6 +11,8 @@ import json
 from plaid import Client
 from jinja2 import Environment, FileSystemLoader
 import os
+import math
+
 
 today_str = str(date.today())
 
@@ -22,6 +24,7 @@ def plaidClient():
                           os.getenv('PLAID_PUBLIC_KEY'),
                           os.getenv('PLAID_ENV'),
                           api_version='2018-05-22')
+    return client
 
 def TESTplaidClient():
     client = plaid.Client(os.getenv('PLAID_CLIENT_ID'),
@@ -78,28 +81,21 @@ def TEST_getTransactions(token, end_date):
 def getTransactions(token, end_date):
     client = plaidClient()
     try:
-        response = client.Transactions.get(token,
-                                    start_date=date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d'),
-                                    end_date=today_str)
-        transactions = response['transactions']
+        account_ids = [account['account_id'] for account in client.Accounts.get(token)['accounts']]
 
-    # Manipulate the count and offset parameters to paginate
-    # transactions and retrieve all available data
-        while len(transactions) < response['total_transactions']:
-            pg = len(transactions)/response['total_transactions'] * 100
-            print('Progress: ', str(pg) + '%')
-            response = client.Transactions.get(token,
-                                            start_date=date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d')
-                                            end_date=today_str,
-                                            offset=len(transactions)
-                                            )
-            transactions.extend(response['transactions'])
-            balance = getBalance(response)
+        response = client.Transactions.get(token, date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d'), end_date, account_ids=account_ids)
+        num_available_transactions= response['total_transactions']
+        num_pages = math.ceil(num_available_transactions / 500)
+        transactions = []
+
+        for page_num in range(num_pages):
+            transactions += [transaction for transaction in client.Transactions.get(token, date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d'), end_date, account_ids=account_ids, offset=page_num * 500, count=500)['transactions']]
+        balance = getBalance(response)
         return transactions, balance
 
     except plaid.errors.PlaidError as e:
-        transactions = jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
-        balance = jsonify({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+        transactions = json.dumps({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+        balance = json.dumps({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
         return transactions, balance
 
 def monthStart():

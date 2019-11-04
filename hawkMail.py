@@ -32,7 +32,6 @@ exclusions = os.getenv('EXCLUDE_CAT').split(",")
 # print(temp)
 tokens = helpers.plaidTokens()
 today_str = str(date.today())
-end_date =
 start_of_month = helpers.monthStart()
 
 
@@ -46,8 +45,8 @@ trnsx_schwab, balance_schwab = helpers.getTransactions(tokens['Schwab']['access_
 trnsx_great_lakes, balance_great_lakes = helpers.getTransactions(tokens['Great_Lakes']['access_token'], today_str)
 trnsx_cap_one, balance_cap_one = helpers.getTransactions(tokens['Capital_One']['access_token'], today_str)
 
-chase_total = helpers.pandaSum(json2pandaClean(trnsx_chase, exclusions))
-schwab_total = helpers.pandaSum(json2pandaClean(trnsx_schwab, exclusions))
+chase_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_chase, exclusions))
+schwab_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_schwab, exclusions))
 
 try:
     all_trnsx = trnsx_chase + trnsx_schwab
