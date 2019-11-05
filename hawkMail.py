@@ -106,6 +106,9 @@ charts_and_tables_html = helpers.htmlTable(os.getenv('PLOTLY_TABLES').split(",")
 
 
 #print(html)
+balance_great_lakes = '-'
+balance_cap_one = '-'
+
 mail_data = helpers.generate_HTML(balance_chase, balance_schwab, charts_and_tables_html, chase_total, schwab_total, balance_great_lakes, balance_cap_one)
 helpers.emailPreview(mail_data)
 
