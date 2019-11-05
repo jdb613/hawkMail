@@ -26,7 +26,7 @@ def plaidClient():
                           api_version='2018-05-22')
     return client
 
-def TESTplaidClient():
+def SANDBOXplaidClient():
     client = plaid.Client(os.getenv('PLAID_CLIENT_ID'),
                         os.getenv('PLAID_SECRET'),
                         os.getenv('PLAID_PUBLIC_KEY'),
@@ -36,66 +36,56 @@ def TESTplaidClient():
 
 def plaidTokens():
     tokens = {}
-    tokens['Chase'] = {'access_token': os.getenv('ACCESS_TOKEN_Chase'), 'item_id': os.getenv('ITEM_ID_Chase'), 'id': 1}
-    tokens['Schwab'] = {'access_token': os.getenv('ACCESS_TOKEN_Schwab'), 'item_id': os.getenv('ITEM_ID_Schwab'), 'id': 2}
-    tokens['Great_Lakes'] = {'access_token': os.getenv('ACCESS_TOKEN_Lakes'), 'item_id': os.getenv('ITEM_ID_Lakes'), 'id': 3}
-    tokens['Capital_One'] = {'access_token': os.getenv('ACCESS_TOKEN_Cap1'), 'item_id': os.getenv('ITEM_ID_Cap1'), 'id': 4}
+    tokens['Chase'] = {'access_token': os.getenv('ACCESS_TOKEN_Chase'), 'item_id': os.getenv('ITEM_ID_Chase'), 'sandbox':os.getenv('ACCESS_TOKEN_Chase_SANDBOX')}
+    tokens['Schwab'] = {'access_token': os.getenv('ACCESS_TOKEN_Schwab'), 'item_id': os.getenv('ITEM_ID_Schwab'), 'sandbox':os.getenv('ACCESS_TOKEN_Schwab_SANDBOX')}
+    tokens['Great_Lakes'] = {'access_token': os.getenv('ACCESS_TOKEN_Lakes'), 'item_id': os.getenv('ITEM_ID_Lakes'), 'sandbox': os.getenv('ACCESS_TOKEN_Lakes_SANDBOX')}
+    tokens['Capital_One'] = {'access_token': os.getenv('ACCESS_TOKEN_Cap1'), 'item_id': os.getenv('ITEM_ID_Cap1'), 'sandbox': os.getenv('ACCESS_TOKEN_Cap1_SANDBOX')}
     return tokens
 
 def getBalance(data):
-    return data['accounts'][0]['balances']['current']
+    return '$' + str(data['accounts'][0]['balances']['current'])
 
-def TEST_getTransactions(token, end_date):
-    client = TESTplaidClient()
-    if token == 'access-development-0b08c2e2-490a-4904-9b06-3f9bad1ac1c8':
-        response = client.Transactions.get('access-sandbox-f65f2f09-45f7-43a4-bab8-0c28334334af', '2016-01-01', end_date)
+def idToken(token):
+    tokens = plaidTokens()
+    for k, v in tokens.items():
+        if v['access_token'] == token:
+            item = k
+        elif v['sandbox'] == token:
+            item = k
+    return item
 
-        transactions = response['transactions']
-        while len(transactions) < response['total_transactions']:
-            pg = len(transactions)/response['total_transactions'] * 100
-            print('Chase Progress: ', str(pg) + '%')
-            response = client.Transactions.get('access-sandbox-f65f2f09-45f7-43a4-bab8-0c28334334af', '2016-01-01', end_date, offset=len(transactions))
+def logResponse(response):
+    with open('templates/plaid_response.json','w') as file:
+        json.dump(response, file, sort_keys=True, indent=4)
+        file.close()
+    return 'Response Logged to plaid_response.json'
 
-            transactions.extend(response['transactions'])
-        balance = response['accounts'][0]['balances']['current']
-
-    else:
-
-        response = client.Transactions.get('access-sandbox-441dcd38-0939-4872-8a84-bd783ca4bbbd', '2016-01-01', end_date)
-
-        transactions = response['transactions']
-        while len(transactions) < response['total_transactions']:
-            pg = len(transactions)/response['total_transactions'] * 100
-            print('Schwab Progress: ', str(pg) + '%')
-            response = client.Transactions.get('access-sandbox-441dcd38-0939-4872-8a84-bd783ca4bbbd', '2016-01-01', end_date, offset=len(transactions))
-
-            transactions.extend(response['transactions'])
-        balance = response['accounts'][0]['balances']['current']
-
-    return transactions, balance
-# Manipulate the count and offset parameters to paginate
-# transactions and retrieve all available data
-
-
-
-def getTransactions(token, end_date):
-    client = plaidClient()
+def getTransactions(client, token, start_date, end_date):
     try:
         account_ids = [account['account_id'] for account in client.Accounts.get(token)['accounts']]
+        print(" {} Account ID's".format(idToken(token)))
+        print(account_ids)
 
-        response = client.Transactions.get(token, date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d'), end_date, account_ids=account_ids)
+        response = client.Transactions.get(token, start_date, end_date, account_ids=account_ids)
+        rez = logResponse(response)
+        print(rez)
+        balance = getBalance(response)
         num_available_transactions= response['total_transactions']
+        print("{} Transactions Recieved from Plaid".format(num_available_transactions))
         num_pages = math.ceil(num_available_transactions / 500)
         transactions = []
 
         for page_num in range(num_pages):
-            transactions += [transaction for transaction in client.Transactions.get(token, date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d'), end_date, account_ids=account_ids, offset=page_num * 500, count=500)['transactions']]
-        balance = getBalance(response)
+            print("{}% Complete".format(page_num/num_pages * 100))
+            transactions += [transaction for transaction in client.Transactions.get(token, start_date, end_date, account_ids=account_ids, offset=page_num * 500, count=500)['transactions']]
+
+
         return transactions, balance
 
     except plaid.errors.PlaidError as e:
-        transactions = json.dumps({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
-        balance = json.dumps({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } })
+        print(json.dumps({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } }))
+        transactions = {'result': e.code}
+        balance = {'result': e.code}
         return transactions, balance
 
 def monthStart():
@@ -120,7 +110,9 @@ def json2pandaClean(data, exclusions):
     return df
 
 def pandaSum(frame):
-    return frame['amount'].sum()
+    fsum = frame['amount'].sum()
+    sum_str = f'{fsum:.2f}'
+    return '$' + sum_str
 
 def monthlySpending(json, exclusions):
     lcl_frame = json2pandaClean(json, exclusions)
@@ -184,6 +176,7 @@ def monthsTransactionTable(data, date):
 
 
 def cumSpendChart_Update(frame):
+    print('Updating Plotly Cumulative Chart')
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -200,9 +193,10 @@ def cumSpendChart_Update(frame):
     fig.update_layout(title_text="Cumulative Spending")
 
     py.plot(fig, filename="CumulativeSpendingChart.html", auto_open=False)
-    return 'Updated'
+    return 'Cumulative Chart Updated'
 
 def plotlyCategoryChart_Update(frame):
+    print('Updating Plotly Category Chart')
     fig = go.Figure()
     fig.add_trace(
         go.Bar(
@@ -212,9 +206,10 @@ def plotlyCategoryChart_Update(frame):
         ))
     fig.update_layout(title_text="This Month's Spending by Category")
     py.plot(fig, filename="CurrentMonthCategory.html", auto_open=False)
-    return 'Success'
+    return 'Plotly Category Chart Updated'
 
 def plotlyCategoryHistory_Update(frame):
+    print('Updating Plotly Category History Chart')
     fig = go.Figure()
     fig.add_trace(
         go.Bar(
@@ -224,9 +219,10 @@ def plotlyCategoryHistory_Update(frame):
         ))
     fig.update_layout(title_text="Historical Spending by Category")
     py.plot(fig, filename="ALLMonthCategory.html", auto_open=False)
-    return 'Success'
+    return 'Plotly Category History Chart Updated'
 
 def plotlyMonthlyChart(frame):
+    print('Updating Plotly Monthly Chart')
     fig = go.Figure()
     fig.add_trace(
         go.Bar(
@@ -235,7 +231,7 @@ def plotlyMonthlyChart(frame):
         ))
     fig.update_layout(title_text="Monthly Total Spending")
     py.plot(fig, filename="HistoricalSpending.html", auto_open=False)
-    return 'Success'
+    return 'Plotly Monthly Chart Updated'
 
 def plotlyTtable(frame):
     values = list(frame.columns)

@@ -4,6 +4,8 @@ from plaid.errors import APIError, ItemError
 import requests
 import json
 from plaid import Client
+from selenium import webdriver
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 import os
 import math
 from datetime import datetime, timedelta, date
@@ -27,48 +29,69 @@ from jinja2 import Environment, FileSystemLoader
 load_dotenv()
 
 exclusions = os.getenv('EXCLUDE_CAT').split(",")
-
-# temp = helpers.jinjaTEST('11', '12')
-# print(temp)
+hawk_mode = str(os.getenv('HAWK_MODE'))
+print('Currently Running in {}'.format(hawk_mode))
 tokens = helpers.plaidTokens()
 today_str = str(date.today())
 start_of_month = helpers.monthStart()
 
+if hawk_mode == 'sandbox':
+    start_date = date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d')
+    trnsx_chase, balance_chase = helpers.getTransactions(helpers.SANDBOXplaidClient(), tokens['Chase']['sandbox'], start_date, today_str)
+    trnsx_schwab, balance_schwab = helpers.getTransactions(helpers.SANDBOXplaidClient(), tokens['Schwab']['sandbox'], start_date, today_str)
+    trnsx_great_lakes, balance_great_lakes = helpers.getTransactions(helpers.SANDBOXplaidClient(), tokens['Great_Lakes']['sandbox'], start_date, today_str)
+    trnsx_cap_one, balance_cap_one = helpers.getTransactions(helpers.SANDBOXplaidClient(), tokens['Capital_One']['sandbox'], start_date, today_str)
 
-# TESTING
-# trnsx_chase, balance_chase = helpers.TEST_getTransactions(tokens['Chase']['access_token'], today_str)
-# trnsx_schwab, balance_schwab = helpers.TEST_getTransactions(tokens['Schwab']['access_token'], today_str)
+elif hawk_mode == 'testing':
+    start_date = date.today() - timedelta(days=7)
+    trnsx_chase, balance_chase = helpers.getTransactions(helpers.plaidClient(), tokens['Chase']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
+    trnsx_schwab, balance_schwab = helpers.getTransactions(helpers.plaidClient(), tokens['Schwab']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
+    trnsx_great_lakes, balance_great_lakes = helpers.getTransactions(helpers.plaidClient(), tokens['Great_Lakes']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
+    trnsx_cap_one, balance_cap_one = helpers.getTransactions(helpers.plaidClient(), tokens['Capital_One']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
 
-#Production
-trnsx_chase, balance_chase = helpers.getTransactions(tokens['Chase']['access_token'], today_str)
-trnsx_schwab, balance_schwab = helpers.getTransactions(tokens['Schwab']['access_token'], today_str)
-trnsx_great_lakes, balance_great_lakes = helpers.getTransactions(tokens['Great_Lakes']['access_token'], today_str)
-trnsx_cap_one, balance_cap_one = helpers.getTransactions(tokens['Capital_One']['access_token'], today_str)
+elif hawk_mode == 'production':
+    start_date = date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d')
+    trnsx_chase, balance_chase = helpers.getTransactions(helpers.plaidClient(), tokens['Chase']['access_token'], start_date, today_str)
+    trnsx_schwab, balance_schwab = helpers.getTransactions(helpers.plaidClient(), tokens['Schwab']['access_token'], start_date, today_str)
+    trnsx_great_lakes, balance_great_lakes = helpers.getTransactions(helpers.plaidClient(), tokens['Great_Lakes']['access_token'], start_date, today_str)
+    trnsx_cap_one, balance_cap_one = helpers.getTransactions(helpers.plaidClient(), tokens['Capital_One']['access_token'], start_date, today_str)
 
-chase_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_chase, exclusions))
-schwab_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_schwab, exclusions))
+
 
 try:
+    chase_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_chase, exclusions))
+    schwab_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_schwab, exclusions))
+    lakes_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_great_lakes, exclusions))
+    cap1_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_cap_one, exclusions))
     all_trnsx = trnsx_chase + trnsx_schwab
 except:
-    all_trnsx = trnsx_chase
+    chase_total = 0
+    schwab_total = 0
+    cap1_total = 0
+    lakes_total = 0
+    all_trnsx = ['error']
 
 ms_frame = helpers.monthlySpending(all_trnsx, exclusions)
-helpers.plotlyMonthlyChart(ms_frame)
+rez = helpers.plotlyMonthlyChart(ms_frame)
+print(rez)
 
 prog_pct = helpers.progress(all_trnsx, start_of_month, exclusions)
 
 cat_spend_cur_month = helpers.curMonthCategories(all_trnsx, start_of_month, exclusions)
-helpers.plotlyCategoryChart_Update(cat_spend_cur_month)
+rez = helpers.plotlyCategoryChart_Update(cat_spend_cur_month)
+print(rez)
 
 cat_spend_all = helpers.categoryHistory(all_trnsx, exclusions)
-helpers.plotlyCategoryHistory_Update(cat_spend_all)
+rez = helpers.plotlyCategoryHistory_Update(cat_spend_all)
+print(rez)
 
 cumulative_spending = helpers.cumulativeSum(all_trnsx, start_of_month, exclusions)
-helpers.cumSpendChart_Update(cumulative_spending)
+rez = helpers.cumSpendChart_Update(cumulative_spending)
+print(rez)
 
 pending_frame = helpers.pendingTable(all_trnsx)
-helpers.plotlyPtable(pending_frame)
+rez = helpers.plotlyPtable(pending_frame)
+print(rez)
 
 cur_month_transaction_table = helpers.monthsTransactionTable(all_trnsx, start_of_month)
 helpers.plotlyTtable(cur_month_transaction_table)
@@ -83,21 +106,30 @@ charts_and_tables_html = helpers.htmlTable(os.getenv('PLOTLY_TABLES').split(",")
 mail_data = helpers.generate_HTML(balance_chase, balance_schwab, charts_and_tables_html, chase_total, schwab_total, balance_great_lakes, balance_cap_one)
 helpers.emailPreview(mail_data)
 
-with open('templates/email_preview.html', 'r') as f:
-    html_string = f.read()
 
 
-message = Mail(
-    from_email=os.getenv('SENDGRID_MAIL'),
-    to_emails=os.getenv('SENDGRID_MAIL'),
-    subject='Daily Spending Report',
-    html_content=html_string)
-try:
-    sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-    response = sg.send(message)
-    print(response.status_code)
-    print(response.body)
-    print(response.headers)
-except Exception as e:
-    print(str(e))
+if hawk_mode == 'production' or hawk_mode == 'testing':
+    with open('templates/email_preview.html', 'r') as f:
+        html_string = f.read()
+        f.close()
+
+    message = Mail(
+        from_email=os.getenv('SENDGRID_MAIL'),
+        to_emails=os.getenv('SENDGRID_MAIL'),
+        subject='Daily Spending Report',
+        html_content=html_string)
+    try:
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sg.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print(str(e))
+
+else:
+
+    binary = FirefoxBinary('/Applications/Firefox.app/Contents/MacOS/firefox-bin')
+    browser = webdriver.Firefox(firefox_binary=binary, executable_path='/Users/jdb/.pyenv/versions/3.8.0/envs/hawkMailENV/bin/geckodriver')
+    browser.get("file:///Users/jdb/Documents/Jeff/Apps/Finances/hawkMail/templates/email_preview.html")
 
