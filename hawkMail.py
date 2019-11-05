@@ -56,16 +56,16 @@ elif hawk_mode == 'production':
     start_date = date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d')
     trnsx_chase, balance_chase = helpers.getTransactions(helpers.plaidClient(), tokens['Chase']['access_token'], start_date, today_str)
     trnsx_schwab, balance_schwab = helpers.getTransactions(helpers.plaidClient(), tokens['Schwab']['access_token'], start_date, today_str)
-    trnsx_great_lakes, balance_great_lakes = helpers.getTransactions(helpers.plaidClient(), tokens['Great_Lakes']['access_token'], start_date, today_str)
-    trnsx_cap_one, balance_cap_one = helpers.getTransactions(helpers.plaidClient(), tokens['Capital_One']['access_token'], start_date, today_str)
+    #trnsx_great_lakes, balance_great_lakes = helpers.getTransactions(helpers.plaidClient(), tokens['Great_Lakes']['access_token'], start_date, today_str)
+    #trnsx_cap_one, balance_cap_one = helpers.getTransactions(helpers.plaidClient(), tokens['Capital_One']['access_token'], start_date, today_str)
 
 
 
 try:
     chase_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_chase, exclusions))
     schwab_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_schwab, exclusions))
-    lakes_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_great_lakes, exclusions))
-    cap1_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_cap_one, exclusions))
+    #lakes_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_great_lakes, exclusions))
+    #cap1_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_cap_one, exclusions))
     all_trnsx = trnsx_chase + trnsx_schwab
 except:
     chase_total = 0
