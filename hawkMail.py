@@ -74,7 +74,7 @@ except:
     lakes_total = 0
     all_trnsx = ['error']
 
-ms_frame = helpers.monthlySpending(all_trnsx, exclusions)
+ms_frame = helpers.monthlySpending(all_trnsx, exclusions, start_of_month)
 rez = helpers.plotlyMonthlyChart(ms_frame)
 print(rez)
 

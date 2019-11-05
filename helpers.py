@@ -130,9 +130,10 @@ def pandaSum(frame):
     sum_str = f'{fsum:.2f}'
     return '$' + sum_str
 
-def monthlySpending(json, exclusions):
+def monthlySpending(json, exclusions, date):
     lcl_frame = json2pandaClean(json, exclusions)
     monthly_sum = lcl_frame.resample('MS', loffset=pd.Timedelta(14, 'd')).sum()
+    monthly_sum = monthly_sum.loc[monthly_sum.index >= date]
     monthly_sum = monthly_sum['amount']
     return monthly_sum.to_frame()
 
@@ -149,7 +150,7 @@ def progress(json, date, exclusions):
 
 def curMonthCategories(data, date, exclusions):
     df1 = json2pandaClean(data, exclusions)
-    cat_df = df1[:date]
+    cat_df = df1.loc[df1.index >= date]
     cat_df = cat_df.groupby('category_1')["amount"].sum()
     df_fram = cat_df.to_frame()
 
