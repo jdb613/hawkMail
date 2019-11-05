@@ -104,6 +104,8 @@ def clear_data_file():
     return 'Data Text File Cleared'
 
 def json2pandaClean(data, exclusions):
+    for e in exclusions:
+        print('exclude: ', e)
     flat_list = []
     with open('templates/data.txt','a') as file:
         file.write(json.dumps(data))
@@ -132,14 +134,14 @@ def pandaSum(frame):
 
 def monthlySpending(json, exclusions, date):
     lcl_frame = json2pandaClean(json, exclusions)
-    monthly_sum = lcl_frame.resample('MS', loffset=pd.Timedelta(14, 'd')).sum()
+    monthly_sum = lcl_frame.resample('D', loffset=pd.Timedelta(14, 'd')).sum()
     monthly_sum = monthly_sum.loc[monthly_sum.index >= date]
     monthly_sum = monthly_sum['amount']
     return monthly_sum.to_frame()
 
 def progress(json, date, exclusions):
     lcl_df = json2pandaClean(json, exclusions)
-    monthly_spending_df = monthlySpending(json, exclusions)
+    monthly_spending_df = monthlySpending(json, exclusions, date)
     three_mnth_trailing = monthly_spending_df[-3:]
     threeMave = three_mnth_trailing.mean()
     this_month_df = lcl_df.loc[date:]

@@ -28,8 +28,8 @@ from jinja2 import Environment, FileSystemLoader
 
 load_dotenv()
 
-exclusions = os.getenv('EXCLUDE_CAT').split(",")
-
+exclusions = os.getenv('EXCLUDE_CAT').split(',')
+exclusions = [x.strip(' ') for x in exclusions]
 
 
 hawk_mode = str(os.getenv('HAWK_MODE'))
@@ -72,12 +72,13 @@ try:
     #lakes_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_great_lakes, exclusions))
     #cap1_total = helpers.pandaSum(helpers.json2pandaClean(trnsx_cap_one, exclusions))
     all_trnsx = trnsx_chase + trnsx_schwab
-except:
+except Exception as e:
+    print(e)
     chase_total = 0
     schwab_total = 0
     cap1_total = 0
     lakes_total = 0
-    all_trnsx = ['error']
+    all_trnsx = {'error': 'error'}
 
 ms_frame = helpers.monthlySpending(all_trnsx, exclusions, start_of_month)
 rez = helpers.plotlyMonthlyChart(ms_frame)
