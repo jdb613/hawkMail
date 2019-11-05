@@ -29,8 +29,13 @@ from jinja2 import Environment, FileSystemLoader
 load_dotenv()
 
 exclusions = os.getenv('EXCLUDE_CAT').split(",")
+
+
+
 hawk_mode = str(os.getenv('HAWK_MODE'))
 print('Currently Running in {}'.format(hawk_mode))
+print('exclusions: ', type(exclusions))
+print(exclusions)
 tokens = helpers.plaidTokens()
 today_str = str(date.today())
 start_of_month = helpers.monthStart()
