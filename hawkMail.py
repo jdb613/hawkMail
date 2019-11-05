@@ -35,6 +35,9 @@ tokens = helpers.plaidTokens()
 today_str = str(date.today())
 start_of_month = helpers.monthStart()
 
+clear_file = helpers.clear_data_file()
+print(clear_file)
+
 if hawk_mode == 'sandbox':
     start_date = date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d')
     trnsx_chase, balance_chase = helpers.getTransactions(helpers.SANDBOXplaidClient(), tokens['Chase']['sandbox'], start_date, today_str)

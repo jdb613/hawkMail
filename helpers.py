@@ -99,9 +99,25 @@ def monthStart():
         month_start = str(todayDate.year) + '-' + str(todayDate.month) + '-' + str(15)
     return(month_start)
 
+def clear_data_file():
+    open('templates/data.txt', "w").close()
+    return 'Data Text File Cleared'
+
 def json2pandaClean(data, exclusions):
-    dic_flattened = (flatten(d) for d in data)
-    df = pd.DataFrame(dic_flattened)
+    flat_list = []
+    with open('templates/data.txt','a') as file:
+        file.write(json.dumps(data))
+        file.close()
+    for d in data:
+        try:
+            dic_flattened = flatten(d)
+            flat_list.append(dic_flattened)
+        except:
+            print('cant flatten: ', type(d))
+            print(d)
+            pass
+
+    df = pd.DataFrame(flat_list)
     df["date"] = pd.to_datetime(df['date'])
     df = df[~df['category_id'].isin(exclusions)]
     df = df.set_index('date')
