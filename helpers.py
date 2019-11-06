@@ -103,6 +103,27 @@ def clear_data_file():
     open('templates/data.txt', "w").close()
     return 'Data Text File Cleared'
 
+def cap1_lakes_get(client, token, start_date, end_date):
+    account_ids = [account['account_id'] for account in client.Accounts.get(token)['accounts']]
+    print(" {} Account ID's".format(idToken(token)))
+    print(account_ids)
+    response = client.Transactions.get(token, start_date, end_date, account_ids=account_ids)
+    return response
+
+def lakesData(data):
+    act_list = data['accounts']
+    balance_sum = 0
+    for a in act_list:
+        balance_sum += int(a['balances']['current'])
+
+    pmt_list = data['transactions']
+    pmt_totals = 0
+    for p in pmt_list:
+        pmt_totals += int(p['amount'])
+
+    return balance_sum, pmt_totals
+
+
 def json2pandaClean(data, exclusions):
     for e in exclusions:
         print('exclude: ', e)
@@ -330,7 +351,7 @@ def htmlTable(tables, html_body):
     return html_body
 
 
-def generate_HTML(balance_chase, balance_schwab, charts_tables, chase_total, schwab_total, balance_great_lakes, balance_cap_one):
+def generate_HTML(balance_chase, balance_schwab, charts_tables, chase_total, schwab_total, cap1_total, balance_great_lakes, balance_cap_one):
     # Create the jinja2 environment.
     # Notice the use of trim_blocks, which greatly helps control whitespace.
     j2_env = Environment(loader=FileSystemLoader('./templates'),
@@ -342,6 +363,7 @@ def generate_HTML(balance_chase, balance_schwab, charts_tables, chase_total, sch
         charts_and_tables=charts_tables,
         Chase_Spent=chase_total,
         Schwab_Spent=schwab_total,
+        Capital1_Spend=cap1_total,
         Capital_One_Balance=balance_cap_one,
         Great_Lakes_Balance=balance_great_lakes
     )
