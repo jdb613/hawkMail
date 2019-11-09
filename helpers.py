@@ -125,8 +125,6 @@ def lakesData(data):
 
 
 def json2pandaClean(data, exclusions):
-    for e in exclusions:
-        print('exclude: ', e)
     flat_list = []
     with open('templates/data.txt','a') as file:
         file.write(json.dumps(data))
