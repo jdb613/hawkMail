@@ -125,7 +125,7 @@ if hawk_mode == 'production' or hawk_mode == 'testing':
 
     message = Mail(
         from_email=os.getenv('SENDGRID_MAIL'),
-        to_emails=os.getenv('SENDGRID_MAIL'),
+        to_email=os.getenv('SENDGRID_MAIL'),
         subject='Daily Spending Report',
         html_content=html_string)
     try:
