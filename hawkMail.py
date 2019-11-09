@@ -111,7 +111,9 @@ charts_and_tables_html = helpers.htmlTable(os.getenv('PLOTLY_TABLES').split(",")
 
 
 
-mail_data = helpers.generate_HTML(balance_chase, balance_schwab, charts_and_tables_html, chase_total, schwab_total, cap1_total, lakes_total, lakes_balance, cap1_balance)
+mail_data = helpers.generate_HTML(balance_chase, balance_schwab, charts_and_tables_html,\
+                                 chase_total, schwab_total, cap1_total, \
+                                lakes_balance, cap1_balance)
 helpers.emailPreview(mail_data)
 
 
