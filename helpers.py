@@ -16,7 +16,7 @@ import math
 
 today_str = str(date.today())
 
-chart_studio.tools.set_credentials_file(username=os.getenv('PLOTLY_USERNAME'), api_key=os.getenv('PLOTLY_API_KEY'))
+
 
 def plaidClient():
     client = plaid.Client(os.getenv('PLAID_CLIENT_ID'),

@@ -39,7 +39,7 @@ print(exclusions)
 tokens = helpers.plaidTokens()
 today_str = str(date.today())
 start_of_month = helpers.monthStart()
-
+chart_studio.tools.set_credentials_file(username=os.getenv('PLOTLY_USERNAME'), api_key=os.getenv('PLOTLY_API_KEY'))
 clear_file = helpers.clear_data_file()
 print(clear_file)
 
