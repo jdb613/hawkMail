@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Demystifying Email Design</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body style="margin: 0; padding: 0;">
+
+    <table border="0" id="mainContainer" align="center" width=600 cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td style="padding: 10px 0 30px 0;">
+                <table align="center" border="0" id="logoContainer" cellpadding="0" cellspacing="0" width="600" style="border: 1px solid #cccccc; border-collapse: collapse;">
+                    <tr>
+                            <td align="right" bgcolor="#70bbd9" style="padding: 10px 0 20px 0; color: #153643; font-size: 20px; font-family: Arial, sans-serif;">
+
+                                            {{ jinja_data.date }}
+
+                        </td>
+                    </tr>
+                    <tr>
+                            <td align="center" bgcolor="#70bbd9" style="padding: 10px 0 60px 0; color: #153643; font-size: 28px; font-weight: bold; font-family: Arial, sans-serif;">
+                                <img src="/Users/jdb/Documents/Jeff/Apps/Finances/hawkMail/templates/logo.png" alt="Tomohawk" width="200" height="100" style="display: block;" />
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td bgcolor="#ffffff" style="padding: 40px 30px 40px 30px;">
+                <table border="0" id="balancesContainer" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td width="120" valign="top">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <a href="https://logo-logos.com/chase-bank-logo-418.html">
+                                            <img src="https://logo-logos.com/wp-content/uploads/2016/10/Chase_Bank_logo_logotype.png" alt="Chase Bank logo, logotype"  width="100%" height="50"/>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        {{jinja_data.balance_chase}}
+                                    </td>
+                                </tr>
+                               <tr>
+                                    <td>
+                                            {{jinja_data.chase_total}}
+                                    </td>
+                                </tr>
+
+                    </tr>
+                </table>
+            </td>
+            <td style="font-size: 0; line-height: 0;" width="20">
+                &nbsp;
+            </td>
+            <td width="120" valign="top">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td>
+                            <a href="https://www.logosurfer.com/wp-content/uploads/2018/03/charles-schwab-logo_0.png" target="_blank">
+                                <img src="https://www.logosurfer.com/wp-content/uploads/2018/03/charles-schwab-logo_0.png"  alt="Charles Schwab Logo" width="100%" height="50"/>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-size: 0; line-height: 0;" width="20">
+                                &nbsp;
+                            </td>
+                    </tr>
+                    <tr>
+                        <td>
+                                {{jinja_data.balance_schwab}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                                {{jinja_data.schwab_total}}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td style="font-size: 0; line-height: 0;" width="20">
+                &nbsp;
+            </td>
+            <td width="120" valign="top">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td>
+                            <a href="https://www.logosurfer.com/wp-content/uploads/2018/03/capital-one-logo_0.png" target="_blank">
+                            <img src="https://www.logosurfer.com/wp-content/uploads/2018/03/capital-one-logo_0.png"  alt="Capital One Logo" width="100%" height="50"/>
+                            </a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="font-size: 0; line-height: 0;" width="20">
+                                &nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                                {{jinja_data.balance_cap_one}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                                {{jinja_data.capone_total}}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td style="font-size: 0; line-height: 0;" width="20">
+                &nbsp;
+            </td>
+            <td width="120" valign="top">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td>
+                                <a href="https://www.logosurfer.com/wp-content/uploads/2018/03/capital-one-logo_0.png" target="_blank">
+                                    <img src="https://cdn.studentloanhero.com/wp-content/uploads/great-lakes-student-loans.jpeg"  alt="Capital One Logo" width="100%" height="50"/>
+                                </a>
+                        </td>
+                    </tr>
+                    <tr>
+                            <td style="font-size: 0; line-height: 0;" width="20">
+                                    &nbsp;
+                                </td>
+                    </tr>
+
+                <tr>
+                        <td>
+                                {{jinja_data.balance_great_lakes}}
+                        </td>
+                                                        </tr>
+                                                        <tr>
+                        <td>
+                                {{jinja_data.greatlakes_total}}
+                        </td>
+                                                        </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</td>
+    </tr>
+        <tr>
+            <td bgcolor="#ffffff" style="padding: 40px 30px 40px 30px;" width="600">
+                <table border="0" id="chartContainer" cellpadding="0" cellspacing="0" width="100%">
+                        {{jinja_data.chart_pack.chartHTML}}
+                </table>
+            </td>
+        </tr>
+        <tr>
+                <td bgcolor="#ffffff" style="padding: 40px 30px 40px 30px;" width="600">
+                    <table border="0" id="chartContainer" cellpadding="0" cellspacing="0" width="100%">
+                            {{jinja_data.chart_pack.tableHTML}}
+                    </table>
+                </td>
+            </tr>
+
+    </table>
+</body>
+</html>
+                        <!-- </td>
+                    </tr>
+                    <tr>
+                        <td bgcolor="#ee4c50" style="padding: 30px 30px 30px 30px;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px;" width="75%">
+                                        &reg; Someone, somewhere 2013<br/>
+                                        <a href="#" style="color: #ffffff;"><font color="#ffffff">Unsubscribe</font></a> to this newsletter instantly
+                                    </td>
+                                    <td align="right" width="25%">
+                                        <table border="0" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="font-family: Arial, sans-serif; font-size: 12px; font-weight: bold;">
+                                                    <a href="http://www.twitter.com/" style="color: #ffffff;">
+                                                        <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/210284/tw.gif" alt="Twitter" width="38" height="38" style="display: block;" border="0" />
+                                                    </a>
+                                                </td>
+                                                <td style="font-size: 0; line-height: 0;" width="20">&nbsp;</td>
+                                                <td style="font-family: Arial, sans-serif; font-size: 12px; font-weight: bold;">
+                                                    <a href="http://www.twitter.com/" style="color: #ffffff;">
+                                                        <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/210284/fb.gif" alt="Facebook" width="38" height="38" style="display: block;" border="0" />
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table> -->
+

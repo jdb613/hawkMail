@@ -12,10 +12,15 @@ from plaid import Client
 from jinja2 import Environment, FileSystemLoader
 import os
 import math
+import locale
+from scipy import stats
+import numpy as np
+import re
 
+locale.setlocale( locale.LC_ALL, '' )
 
 today_str = str(date.today())
-
+hawk_mode = str(os.getenv('HAWK_MODE'))
 
 
 def plaidClient():
@@ -127,9 +132,13 @@ def lakesData(data):
 def json2pandaClean(data, exclusions):
     flat_list = []
     with open('templates/data.txt','a') as file:
-        file.write(json.dumps(data))
+        try:
+            file.write(json.dumps(data))
+        except:
+            file.write(json.dumps(str(data)))
         file.close()
     for d in data:
+
         try:
             dic_flattened = flatten(d)
             flat_list.append(dic_flattened)
@@ -151,17 +160,211 @@ def pandaSum(frame):
     sum_str = f'{fsum:.2f}'
     return '$' + sum_str
 
-def monthlySpending(json, exclusions, date):
-    lcl_frame = json2pandaClean(json, exclusions)
-    monthly_sum = lcl_frame.resample('D', loffset=pd.Timedelta(14, 'd')).sum()
-    monthly_sum = monthly_sum.loc[monthly_sum.index >= date]
-    monthly_sum = monthly_sum['amount']
-    return monthly_sum.to_frame()
+def drop_columns(df):
+    df = df.drop(columns=['location_address', 'location_city', 'location_lat',
+       'location_lon', 'location_state', 'location_store_number','account_owner','payment_meta_by_order_of',
+       'payment_meta_payee', 'payment_meta_payer',
+       'payment_meta_payment_method', 'payment_meta_payment_processor',
+       'payment_meta_ppd_id', 'payment_meta_reason',
+       'payment_meta_reference_number','pending_transaction_id', 'transaction_id', 'pending'])
+    return df
 
-def progress(json, date, exclusions):
+def tidy_df(df, hawk_mode):
+    if hawk_mode == 'sandbox':
+        client = SANDBOXplaidClient()
+        tokens = plaidTokens()
+        chase_ids = [account['account_id'] for account in client.Accounts.get(tokens['Chase']['sandbox'])['accounts']]
+        schwab_ids = [account['account_id'] for account in client.Accounts.get(tokens['Schwab']['sandbox'])['accounts']]
+        all_ids = chase_ids + schwab_ids
+        df = df[df['account_id'].isin(all_ids)]
+    else:
+        df['account_id'] = df['account_id'].map({'LOgERxzqrNFLPZdyNx7oFb9JwX39wzU05vVvd': 'Chase', 'vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX': 'Schwab'})
+    df=df.rename(columns = {'account_id':'account'})
+    tdfst = df[['account', 'amount', 'name', 'category_0', 'category_1', 'category_2']]
+    #df.index = df.index.strftime('%m/%d/%y')
+    return df
+
+def getData(environment, exclusions):
+    master_data = {}
+    tokens = plaidTokens()
+    today_str = str(date.today())
+
+    if environment == 'sandbox':
+        start_date = date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d')
+        trnsx_chase, master_data['balance_chase'] = getTransactions(SANDBOXplaidClient(), tokens['Chase']['sandbox'], start_date, today_str)
+        trnsx_schwab, master_data['balance_schwab'] = getTransactions(SANDBOXplaidClient(), tokens['Schwab']['sandbox'], start_date, today_str)
+        cap1_response = cap1_lakes_get(SANDBOXplaidClient(), tokens['Capital_One']['sandbox'], start_date, today_str)
+        lakes_response = cap1_lakes_get(SANDBOXplaidClient(), tokens['Great_Lakes']['sandbox'], start_date, today_str)
+
+    elif environment == 'testing':
+        start_date = date.today() - timedelta(days=30)
+        trnsx_chase, master_data['balance_chase'] = getTransactions(plaidClient(), tokens['Chase']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
+        trnsx_schwab, master_data['balance_schwab'] = getTransactions(plaidClient(), tokens['Schwab']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
+        cap1_response = cap1_lakes_get(plaidClient(), tokens['Capital_One']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
+        lakes_response = cap1_lakes_get(plaidClient(), tokens['Great_Lakes']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
+
+
+    elif environment == 'production':
+        start_date = date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d')
+        trnsx_chase, master_data['balance_chase'] = getTransactions(plaidClient(), tokens['Chase']['access_token'], start_date, today_str)
+        trnsx_schwab, master_data['balance_schwab'] = getTransactions(plaidClient(), tokens['Schwab']['access_token'], start_date, today_str)
+        cap1_response = cap1_lakes_get(plaidClient(), tokens['Capital_One']['access_token'], start_date, today_str)
+        lakes_response = cap1_lakes_get(plaidClient(), tokens['Great_Lakes']['access_token'], start_date, today_str)
+
+    try:
+        master_data['chase_total'] = pandaSum(json2pandaClean(trnsx_chase, exclusions))
+        master_data['schwab_total'] = pandaSum(json2pandaClean(trnsx_schwab, exclusions))
+        master_data['lakes_balance'], master_data['lakes_total'] = lakesData(lakes_response)
+        master_data['cap1_balance'], master_data['cap1_total'] = lakesData(cap1_response)
+        master_data['all_trnsx'] = trnsx_chase + trnsx_schwab
+
+
+    except Exception as e:
+        print(e)
+        master_data['chase_total'] = 0
+        master_data['schwab_total'] = 0
+        master_data['cap1_total'] = 0
+        master_data['lakes_total'] = 0
+        master_data['cap1_balance'] = 0
+        master_data['lakes_balance'] = 0
+        master_data['all_trnsx'] = {'error': e}
+
+    return master_data
+
+def cumulativeSum(data, date, exclusions, hawk_mode):
+    df = json2pandaClean(data, exclusions)
+    month_trnsx = df.loc[df.index >= date]
+    month_trnsx1 = month_trnsx.resample('D')['amount'].sum().reset_index()
+    month_trnsx1['CUMSUM'] = month_trnsx1['amount'].cumsum()
+    month_trnsx1 = month_trnsx1.set_index('date')
+    print('Updating Plotly Cumulative Chart')
+    fig = go.Figure(
+        data=[
+            go.Scatter(name='Cumulative Spending', x=month_trnsx1.index.tolist(), y=month_trnsx1.CUMSUM.tolist(), yaxis="y2"),
+            go.Bar(name='Daily Spend', x=month_trnsx1.index.tolist(), y=month_trnsx1.amount.tolist(),
+                text = [str('<b>' + locale.currency(i) + '</b>') for i in month_trnsx1.amount.tolist()],
+                textposition='auto',
+                    textfont=dict(
+                    color="yellow"
+                    ))
+        ],
+        layout=go.Layout(
+            title=go.layout.Title(text="Cumulative Spending")
+        ))
+    fig.update_xaxes(nticks=len(month_trnsx1), tickangle=45)
+    fig.update_layout(
+            yaxis=dict(
+                title="Daily Spend",
+                titlefont=dict(
+                    color="#d50301"
+                    ),
+            tickfont=dict(
+                    color="#d50301"
+                )
+            ),
+            yaxis2=dict(
+                title="Cumulative Spending",
+                titlefont=dict(
+                    color="#0400fb"
+                ),
+                tickfont=dict(
+                    color="#0400fb"
+                ),
+                anchor="x",
+                overlaying="y",
+                side="right"
+            ))
+    try:
+        if hawk_mode == 'sandbox':
+            fig.show()
+        else:
+            py.plot(fig, filename="CumulativeSpending", auto_open=False)
+        return 'Plotly Cumulative Chart Updated'
+    except Exception as e:
+        return '{}% Chart Update Error'.format(filename)
+
+def paymentFinder(json):
+    df = pd.DataFrame(json)
+    df["date"] = pd.to_datetime(df['date'])
+    df = df.set_index('date')
+    df = df.loc[df['category_id'] == '16001000']
+    df = df.loc[df['pending'] == False]
+    monthly_sum = df.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
+    return monthly_sum
+
+def monthlySpending(json, exclusions, hawk_mode):
+    tokens = plaidTokens()
+
+    sum_frame = json2pandaClean(json, exclusions)
+    sum_frame = drop_columns(sum_frame)
+    sum_frame = tidy_df(sum_frame, hawk_mode)
+    if hawk_mode == 'sandbox':
+        client = SANDBOXplaidClient()
+
+        chase_frame = sum_frame[sum_frame['account'].isin([account['account_id'] for account in client.Accounts.get(tokens['Chase']['sandbox'])['accounts']])]
+        schwab_frame = sum_frame[sum_frame['account'].isin([account['account_id'] for account in client.Accounts.get(tokens['Schwab']['sandbox'])['accounts']])]
+        account_names = chase_frame + schwab_frame
+        both_frames = sum_frame[sum_frame['account'].isin(account_names)]
+    else:
+        client = plaidClient()
+        account_names = ['Chase, Schwab']
+        chase_frame = sum_frame[sum_frame['account'] == 'Chase']
+        schwab_frame = sum_frame[sum_frame['account'] == 'Schwab']
+        both_frames = sum_frame[sum_frame['account'].isin(account_names)]
+
+    Cmonthly_sum = schwab_frame.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
+    Smonthly_sum = chase_frame.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
+    both_frames = both_frames.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
+    cc_payments = paymentFinder(json)
+    #Cmonthly_sum = Cmonthly_sum.drop(columns=['category'])
+    #Smonthly_sum = Smonthly_sum.drop(columns=['category'])
+    print('Updating Plotly Monthly Chart')
+    fig = go.Figure(
+    data=[
+    go.Bar(name='Chase', x=Cmonthly_sum.index.tolist(), y=Cmonthly_sum.amount.tolist(),
+            text = [locale.currency(i) for i in Cmonthly_sum.amount.tolist()],
+            textposition='auto'),
+    go.Bar(name='Schwab', x=Smonthly_sum.index.tolist(), y=Smonthly_sum.amount.tolist(),
+            text = [locale.currency(i) for i in Smonthly_sum.amount.tolist()],
+            textposition='auto')
+    ],
+    layout=go.Layout(
+        title=go.layout.Title(text="Monthly Spending")
+    ))
+    fig.update_xaxes(nticks=len(Cmonthly_sum), tickangle=45)
+    fig.update_layout(barmode='stack')
+
+    for i in range(len(cc_payments.amount.to_list())):
+    start = cc_payments.index[i]
+    fig.add_shape(
+        # Line Horizontal
+        go.layout.Shape(
+            type="line",
+            x0= start ,
+            y0=cc_payments[i].amount,
+            x1=start,
+            y1=cc_payments[i].amount,
+            line=dict(
+                color="LightSeaGreen",
+                width=5,
+                dash="dashdot",
+            ),
+    ))
+fig.update_shapes(dict(xref='x', yref='y'))
+    if hawk_mode == 'sandbox':
+            fig.show()
+    else:
+        py.plot(fig, filename="monthly_spending", auto_open=False)
+    return both_frames
+
+def progress(json, date, exclusions, hawk_mode):
     lcl_df = json2pandaClean(json, exclusions)
-    monthly_spending_df = monthlySpending(json, exclusions, date)
+    monthly_spending_df = monthlySpending(json, exclusions, hawk_mode)
+    print('Monthly Spending')
+    print(monthly_spending_df)
     three_mnth_trailing = monthly_spending_df[-3:]
+    print('3 Month Trailing')
+    print(three_mnth_trailing)
     threeMave = three_mnth_trailing.mean()
     this_month_df = lcl_df.loc[date:]
     dec = this_month_df['amount'].sum()/threeMave * 100
@@ -169,82 +372,309 @@ def progress(json, date, exclusions):
     pct = f'{dec_rez:.2f}' + '%'
     return pct
 
-def curMonthCategories(data, date, exclusions):
+def curMonthCategories(data, date, exclusions, hawk_mode):
     df1 = json2pandaClean(data, exclusions)
     cat_df = df1.loc[df1.index >= date]
     cat_df = cat_df.groupby('category_1')["amount"].sum()
     df_fram = cat_df.to_frame()
+    df_fram = df_fram[-15:].sort_values(by='amount', ascending=True)
+    print('Updating Plotly Category Chart')
+    fig = go.Figure(
+        data = [
+            go.Bar(
+                name="Category Spend",
+                y=df_fram.index.tolist(),
+                x=df_fram.amount.values.tolist(),
+                marker=dict(
+                color='rgba(58, 71, 80, 0.6)',
+                line=dict(
+                    color='rgba(58, 71, 80, 0.6)',
+                    width=1),
+                    ),
+                orientation='h')
+            ],
+        layout=go.Layout(
+            title=go.layout.Title(text="This Month's Spending by Category")
+        ))
+    annotations = []
+    for yd, xd in zip(df_fram.index.tolist(), df_fram.amount.values.tolist()):
+        annotations.append(dict(xref='x1', yref='y1',
+                                y=yd, x=xd + 100,
+                                text=locale.currency(xd),
+                                font=dict(family='Arial', size=12,
+                                        color='rgb(50, 171, 96)'),
+                                showarrow=False))
+    fig.update_layout(annotations=annotations)
+    if hawk_mode == 'sandbox':
+            fig.show()
+    else:
+        py.plot(fig, filename="CurrentMonthCategory", auto_open=False)
+    return 'Plotly Current Month Category Chart Updated'
 
-    return df_fram.sort_values(by='category_1', ascending=True)
+def topCategoryName(data, date, exclusions, hawk_mode):
+    HTML = []
+    frame = json2pandaClean(data, exclusions)
+    frame = drop_columns(frame)
+    frame = tidy_df(frame, hawk_mode)
+    frame = frame.loc[date:]
+    category_df = frame.groupby('category_0')['amount'].sum().nlargest(5)
+    for i in range(len(category_df)):
 
-def categoryHistory(data, exclusions):
+        cat_data = frame[frame['category_0'] == category_df.index[i]]
+
+        plt_data = cat_data.groupby('name')['amount'].sum().sort_values()[-25:]
+        print('Updating Top Category Name Chart {}%'.format(i))
+        fig = go.Figure(go.Bar(
+                x=[locale.currency(j) for j in plt_data.values.tolist()],
+                y=plt_data.index.tolist(),
+                orientation='h'))
+        fig.update_layout(
+            title=category_df.index[i])
+        filename = 'topCategoryNameBarChart' + str(i)
+        if hawk_mode == 'sandbox':
+            fig.show()
+        else:
+            py.plot(fig, filename=filename, auto_open=False)
+    return "Plotly Top Category Name Chart{}% Updated".format(i)
+
+
+
+
+def categoryHistory(data, exclusions, hawk_mode):
     df1 = json2pandaClean(data, exclusions)
     cat_df = df1.groupby('category_1')["amount"].sum()
     df_fram = cat_df.to_frame()
+    df_fram = df_fram[-15:].sort_values(by='amount', ascending=True)
+
+    print('Updating Plotly Category Chart')
+    fig = go.Figure(
+        data = [
+            go.Bar(
+                name="Category Spend Historically",
+                y=df_fram.index.tolist(),
+                x=df_fram.amount.values.tolist(),
+                marker=dict(
+                color='rgba(58, 71, 80, 0.6)',
+                line=dict(
+                    color='rgba(58, 71, 80, 0.6)',
+                    width=1),
+                    ),
+                orientation='h')
+            ],
+        layout=go.Layout(
+            title=go.layout.Title(text="This Month's Spending by Category")
+        ))
+    annotations = []
+    for yd, xd in zip(df_fram.index.tolist(), df_fram.amount.values.tolist()):
+        annotations.append(dict(xref='x1', yref='y1',
+                                y=yd, x=xd + 100,
+                                text=locale.currency(xd),
+                                font=dict(family='Arial', size=12,
+                                        color='rgb(50, 171, 96)'),
+                                showarrow=False))
+    fig.update_layout(annotations=annotations)
+    if hawk_mode == 'sandbox':
+            fig.show()
+    else:
+        py.plot(fig, filename="CurrentMonthCategory", auto_open=False)
+    print('Plotly Current Month Category Chart Updated')
     return df_fram.sort_values(by='category_1', ascending=True)
 
-def cumulativeSum(data, date, exclusions):
+def relativeCategories(data, date, exclusions, hawk_mode):
+    df1 = json2pandaClean(data, exclusions)
+    df1 = drop_columns(df1)
+    df1 = tidy_df(df1, hawk_mode)
+
+    df_mean = df1.groupby([pd.Grouper(freq='M'), 'category_1'])['amount'].mean().unstack().mean(axis=0)
+
+    df_current = df1.loc['2019-10-15':]
+    df_current = df_current.groupby('category_1')['amount'].mean()
+
+    combined = pd.concat([df_current, df_mean], axis=1, sort=True).dropna()
+    combined.columns = ['This Month', 'Average']
+    combined = combined.sort_values('This Month')
+    z = np.abs(stats.zscore(combined))
+    comb = combined[(z < 4).all(axis=1)].sort_values('This Month')
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=comb.index.tolist(),
+                    y=comb['This Month'].tolist(),
+                    name='This Month',
+                    marker_color='rgb(55, 83, 109)'
+                    ))
+    fig.add_trace(go.Bar(x=comb.index.tolist(),
+                    y=comb['Average'].tolist(),
+                    name='Average',
+                    marker_color='rgb(26, 118, 255)'
+                    ))
+
+    fig.update_layout(
+        title='Relative Category Spending',
+        xaxis_tickfont_size=14,
+        yaxis=dict(
+            title='Spent',
+            titlefont_size=16,
+            tickfont_size=14,
+        ),
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+        barmode='group',
+        bargap=0.15, # gap between bars of adjacent location coordinates.
+        bargroupgap=0.1 # gap between bars of the same location coordinate.
+    )
+    if hawk_mode == 'sandbox':
+            fig.show()
+    else:
+        py.plot(fig, filename="RelativeCategory", auto_open=False)
+    return 'Plotly Relative Category Chart Updated'
+
+def pendingTable(data, exclusions):
     df = json2pandaClean(data, exclusions)
-    month_trnsx = df.loc[df.index >= date]
-    month_trnsx1 = month_trnsx.resample('D')['amount'].sum().reset_index()
-    month_trnsx1['CUMSUM'] = month_trnsx1['amount'].cumsum()
-    month_trnsx1 = month_trnsx1.set_index('date')
-    return month_trnsx1
-
-def pendingTable(data):
-    dic_flattened = (flatten(d) for d in data)
-    df = pd.DataFrame(dic_flattened)
-    df["date"] = pd.to_datetime(df['date'])
-    df = df.set_index('date')
-    df = df.sort_index()
     df = df.loc[df.pending == True]
-    df1 = df[['account_id','amount', 'category_0', 'category_1', 'category_2', 'name', 'location_city', 'location_state','transaction_type']]
-    return df1
-
-def monthsTransactionTable(data, date):
-    dic_flattened = (flatten(d) for d in data)
-    df = pd.DataFrame(dic_flattened)
-    df["date"] = pd.to_datetime(df['date'])
-    df = df.set_index('date')
+    df = drop_columns(df)
+    df = tidy_df(df, hawk_mode)
     df = df.sort_index()
+
+
+    data_in_html = df.to_html(index=True)
+    total_id = 'totalID'
+    header_id = 'headerID'
+    style_in_html = """<style>
+        table#{total_table} {{color='black';font-size:13px; text-align:center; border:0.2px solid black;
+                            border-collapse:collapse; table-layout:fixed; height="250"; text-align:center }}
+        thead#{header_table} {{background-color: #4D4D4D; color:#ffffff}}
+        </style>""".format(total_table=total_id, header_table=header_id)
+    data_in_html = re.sub(r'<table', r'<table id=%s ' % total_id, data_in_html)
+    data_in_html = re.sub(r'<thead', r'<thead id=%s ' % header_id, data_in_html)
+
+    return data_in_html
+
+def monthsTransactionTable(data, date, exclusions, hawk_mode):
+    df = json2pandaClean(data, exclusions)
     df = df.loc[df.pending == False]
+    df = drop_columns(df)
+    df = tidy_df(df, hawk_mode)
+    df = df.sort_index()
+
     df = df.loc[df.index >= date]
-    df1 = df[['name', 'amount', 'category_0', 'category_1', 'category_2', 'location_city', 'location_state', 'account_id', 'transaction_type']]
-    return df1
+
+    data_in_html = df.to_html(index=True)
+    total_id = 'totalID'
+    header_id = 'headerID'
+    style_in_html = """<style>
+        table#{total_table} {{color='black';font-size:13px; text-align:center; border:0.2px solid black;
+                            border-collapse:collapse; table-layout:fixed; height="250"; text-align:center }}
+        thead#{header_table} {{background-color: #4D4D4D; color:#ffffff}}
+        </style>""".format(total_table=total_id, header_table=header_id)
+    data_in_html = re.sub(r'<table', r'<table id=%s ' % total_id, data_in_html)
+    data_in_html = re.sub(r'<thead', r'<thead id=%s ' % header_id, data_in_html)
+
+    return data_in_html
+
+def chartLINK(filename):
+    try:
+        url = py.plot(fig, filename=c)
+        return url.resource
+    except:
+        return 'Link Not Found'
 
 
-def cumSpendChart_Update(frame):
-    print('Updating Plotly Cumulative Chart')
+def tableChartHTML(data, date, exclusions, hawk_mode, chart_files):
+    chartsHTML = ''
+    for c in chart_files:
+        chart_link = chartLINK(c)
+        chartHTML = htmlGraph(c)
+        chartsHTML += chartHTML
+        if 'topCategoryNameBarChart' in c:
+
+            frame = json2pandaClean(data, exclusions)
+            frame = drop_columns(frame)
+            frame = tidy_df(frame, hawk_mode)
+            frame = frame.loc[date:]
+            category_df = frame.groupby('category_0')['amount'].sum().nlargest(5)
+
+            fig = py.get_figure(c)
+            title = fig['layout']['title']
+            cat_data = frame[frame['category_0'] == title]
+
+            plt_data = cat_data.groupby('name')['amount'].sum().sort_values()
+            header = '<h2>' + str(title) + '</h2>'
+            chartHTML += header
+            html_data = plt_data.to_frame().nlargest(5, 'amount')
+            df_html_output = html_data.to_html().replace('<th>','<th style = "background-color: grey">')
+            chartHTML += df_html_output
+
+
+        body = '\r\n\n<br>'.join('%s'%item for item in chartHTML)
+
+
+        return body
+
+
+
+
+
+########## Plotly Charts ########
+# def cumSpendChart_Update(frame):
+#     print('Updating Plotly Cumulative Chart')
+#     fig = go.Figure()
+#     fig.add_trace(
+#         go.Scatter(
+#             x=frame.index,
+#             y= frame.CUMSUM,
+#             name="Cumulative Spend"
+#         ))
+#     fig.add_trace(
+#         go.Bar(
+#             x=frame.index,
+#             y=frame.amount,
+#             name="Daily Spend"
+#         ))
+#     fig.update_layout(title_text="Cumulative Spending")
+
+#     py.plot(fig, filename="CumulativeSpendingChart.html", auto_open=False)
+#     return 'Cumulative Chart Updated'
+
+# def plotlyCategoryChart_Update(frame):
+#     print('Updating Plotly Category Chart')
+#     fig = go.Figure()
+#     fig.add_trace(
+#         go.Bar(
+#             y = frame.index,
+#             x = frame.amount,
+#             orientation='h'
+#         ))
+#     fig.update_layout(title_text="This Month's Spending by Category")
+#     py.plot(fig, filename="CurrentMonthCategory.html", auto_open=False)
+#     return 'Plotly Category Chart Updated'
+
+def plotlyTopCategoryNameChart(frame, number):
+    fig = go.Figure(go.Bar(
+            x=frame.values.tolist(),
+            y=frame.index.tolist(),
+            orientation='h'))
+    fig.update_layout(
+        title=category_df.index[i])
+    filename = 'topCategoryNameBarChart'
+    py.plot(fig, filename=filename, auto_open=False)
+    print("Plotly Top Category Name Chart{}% Updated".format(number))
+    return filename
+
+def plotlyMonthlyChart(frame):
+    print('Updating Plotly Monthly Chart')
     fig = go.Figure()
     fig.add_trace(
-        go.Scatter(
-            x=frame.index,
-            y= frame.CUMSUM,
-            name="Cumulative Spend"
-        ))
-    fig.add_trace(
         go.Bar(
-            x=frame.index,
-            y=frame.amount,
-            name="Daily Spend"
+            x = frame.index,
+            y = frame.amount
         ))
-    fig.update_layout(title_text="Cumulative Spending")
-
-    py.plot(fig, filename="CumulativeSpendingChart.html", auto_open=False)
-    return 'Cumulative Chart Updated'
-
-def plotlyCategoryChart_Update(frame):
-    print('Updating Plotly Category Chart')
-    fig = go.Figure()
-    fig.add_trace(
-        go.Bar(
-            y = frame.index,
-            x = frame.amount,
-            orientation='h'
-        ))
-    fig.update_layout(title_text="This Month's Spending by Category")
-    py.plot(fig, filename="CurrentMonthCategory.html", auto_open=False)
-    return 'Plotly Category Chart Updated'
+    fig.update_layout(title_text="Monthly Total Spending")
+    py.plot(fig, filename="HistoricalSpending.html", auto_open=False)
+    return 'Plotly Monthly Chart Updated'
 
 def plotlyCategoryHistory_Update(frame):
     print('Updating Plotly Category History Chart')
@@ -259,17 +689,7 @@ def plotlyCategoryHistory_Update(frame):
     py.plot(fig, filename="ALLMonthCategory.html", auto_open=False)
     return 'Plotly Category History Chart Updated'
 
-def plotlyMonthlyChart(frame):
-    print('Updating Plotly Monthly Chart')
-    fig = go.Figure()
-    fig.add_trace(
-        go.Bar(
-            x = frame.index,
-            y = frame.amount
-        ))
-    fig.update_layout(title_text="Monthly Total Spending")
-    py.plot(fig, filename="HistoricalSpending.html", auto_open=False)
-    return 'Plotly Monthly Chart Updated'
+
 
 def plotlyTtable(frame):
     values = list(frame.columns)
@@ -306,6 +726,21 @@ def plotlyPtable(frame):
     fig.update_layout(title_text="Pending Transactions")
     py.plot(fig, filename="PendingTable.html", auto_open=False)
     return 'Success'
+
+def blankHTMLchart(link):
+    template = (''
+    '<a href="{link}" target="_blank">' # Open the interactive graph when you click on the image
+        '<img src="{link}.png">'        # Use the ".png" magic url so that the latest, most-up-to-date image is included
+    '</a>'
+    '{link}'                              # Optional caption to include below the graph
+    '<br>'                                   # Line break
+    '<a href="{link}" style="color: rgb(190,190,190); text-decoration: none; font-weight: 200;" target="_blank">'
+        'Click to comment and see the interactive graph'  # Direct readers to Plotly for commenting, interactive graph
+    '</a>'
+    '<br>'
+    '<hr>'                                   # horizontal line
+    '')
+    return template
 
 def htmlGraph(graphs):
   template = (''
@@ -349,12 +784,12 @@ def htmlTable(tables, html_body):
     return html_body
 
 
-def generate_HTML(balance_chase, balance_schwab, charts_tables, chase_total, schwab_total, cap1_total, balance_great_lakes, balance_cap_one):
+def generate_HTML(balance_chase, balance_schwab, charts_tables, chase_total, schwab_total, cap1_total, balance_great_lakes, balance_cap_one, topCatHTML):
     # Create the jinja2 environment.
     # Notice the use of trim_blocks, which greatly helps control whitespace.
     j2_env = Environment(loader=FileSystemLoader('./templates'),
                          trim_blocks=True)
-    template_ready = j2_env.get_template('hawkplate.html').render(
+    template_ready = j2_env.get_template('newhawk.html').render(
         Date=today_str,
         Chase_Balance=balance_chase,
         Schwab_Balance=balance_schwab,
@@ -367,15 +802,13 @@ def generate_HTML(balance_chase, balance_schwab, charts_tables, chase_total, sch
     )
     return template_ready
 
-def jinjaTEST(balone, baltwo):
+def jinjaTEST(data):
     j2_env = Environment(loader=FileSystemLoader('./templates'),
                          trim_blocks=True)
-    template_ready = j2_env.get_template('hawkplate.html').render(
-        Date=today_str,
-        Chase_Balance=balone,
-        Schwab_Balance=baltwo
-
+    template_ready = j2_env.get_template('newhawk.html').render(
+        jinja_data=data
     )
+
     return template_ready
 
 def emailPreview(mail):

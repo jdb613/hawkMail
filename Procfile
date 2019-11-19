@@ -1,1 +1,1 @@
-worker: python hawkMail.py
+python hawkMail.py --cron
