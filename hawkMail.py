@@ -40,6 +40,8 @@ hawk_mode = str(os.getenv('HAWK_MODE'))
 print('Currently Running in {}'.format(hawk_mode))
 print('exclusions: ', type(exclusions))
 print(exclusions)
+print('chart files: ', type(chart_files))
+print(chart_files)
 tokens = helpers.plaidTokens()
 
 start_of_month = helpers.monthStart()
@@ -58,7 +60,8 @@ data = dict(
     balance_cap_one=  master_data['cap1_balance'],
     capone_total='<BETA>',
     balance_great_lakes=master_data['lakes_balance'],
-    greatlakes_total='<BETA>'
+    greatlakes_total='<BETA>',
+    chart_pack = {}
 )
 
 
@@ -86,7 +89,7 @@ rez = helpers.categoryHistory(master_data['all_trnsx'], exclusions, hawk_mode)
 print(rez)
 
 #Update Relative Category Chart
-rez = helpers.relativeCategories(master_data['all_trnsx'], date, exclusions, hawk_mode)
+rez = helpers.relativeCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 print(rez)
 
 #Table HTML
@@ -106,10 +109,12 @@ transaction_HTML = helpers.monthsTransactionTable(master_data['all_trnsx'], star
 #                                  lakes_balance, cap1_balance, topCatHTML)
 
 
-data['chartHTML'] = helpers.tableChartHTML(master_data['all_trnsx'], date, exclusions, hawk_mode, chart_files)
+data['chart_pack']['chartHTML'] = helpers.tableChartHTML(master_data['all_trnsx'], month_start, exclusions, hawk_mode, chart_files)
 pending = helpers.pendingTable(master_data['all_trnsx'], exclusions)
-months = helpers.monthsTransactionTable(master_data['all_trnsx'], date, exclusions, hawk_mode)
-data['tableHTML'] = pending + months
+months = helpers.monthsTransactionTable(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+data['chart_pack']['tableHTML'] = pending + months
+
+# print('ChartHTML: ', data['chart_pack']['chartHTML'])
 
 mail_data = helpers.jinjaTEST(data)
 helpers.emailPreview(mail_data)

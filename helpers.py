@@ -61,6 +61,7 @@ def idToken(token):
 
 def logResponse(response):
     with open('templates/plaid_response.json','w') as file:
+        print(f"**** New Response **** ", file=file)
         json.dump(response, file, sort_keys=True, indent=4)
         file.close()
     return 'Response Logged to plaid_response.json'
@@ -102,6 +103,8 @@ def monthStart():
         month_start = str(todayDate.year) + '-' + str(todayDate.month - 1) + '-' + str(15)
     else:
         month_start = str(todayDate.year) + '-' + str(todayDate.month) + '-' + str(15)
+    print('Start of Month: ', month_start)
+    print('Start of Month Type: ', type(month_start))
     return(month_start)
 
 def clear_data_file():
@@ -182,7 +185,7 @@ def tidy_df(df, hawk_mode):
     df=df.rename(columns = {'account_id':'account'})
     tdfst = df[['account', 'amount', 'name', 'category_0', 'category_1', 'category_2']]
     #df.index = df.index.strftime('%m/%d/%y')
-    return df
+    return tdfst
 
 def getData(environment, exclusions):
     master_data = {}
@@ -220,7 +223,7 @@ def getData(environment, exclusions):
 
 
     except Exception as e:
-        print(e)
+
         master_data['chase_total'] = 0
         master_data['schwab_total'] = 0
         master_data['cap1_total'] = 0
@@ -228,7 +231,7 @@ def getData(environment, exclusions):
         master_data['cap1_balance'] = 0
         master_data['lakes_balance'] = 0
         master_data['all_trnsx'] = {'error': e}
-
+        print('Exception!!', master_data['all_trnsx'])
     return master_data
 
 def cumulativeSum(data, date, exclusions, hawk_mode):
@@ -316,6 +319,8 @@ def monthlySpending(json, exclusions, hawk_mode):
     Smonthly_sum = chase_frame.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
     both_frames = both_frames.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
     cc_payments = paymentFinder(json)
+    print('cc_payments type : ', type(cc_payments))
+    print('cc_payments 0 : ', cc_payments.iloc[0].amount)
     #Cmonthly_sum = Cmonthly_sum.drop(columns=['category'])
     #Smonthly_sum = Smonthly_sum.drop(columns=['category'])
     print('Updating Plotly Monthly Chart')
@@ -335,24 +340,24 @@ def monthlySpending(json, exclusions, hawk_mode):
     fig.update_layout(barmode='stack')
 
     for i in range(len(cc_payments.amount.to_list())):
-    start = cc_payments.index[i]
-    fig.add_shape(
-        # Line Horizontal
-        go.layout.Shape(
-            type="line",
-            x0= start ,
-            y0=cc_payments[i].amount,
-            x1=start,
-            y1=cc_payments[i].amount,
-            line=dict(
-                color="LightSeaGreen",
-                width=5,
-                dash="dashdot",
-            ),
-    ))
-fig.update_shapes(dict(xref='x', yref='y'))
+        start = cc_payments.index[i]
+        fig.add_shape(
+            # Line Horizontal
+            go.layout.Shape(
+                type="line",
+                x0= start ,
+                y0=cc_payments.iloc[i].amount,
+                x1=start,
+                y1=cc_payments.iloc[i].amount,
+                line=dict(
+                    color="LightSeaGreen",
+                    width=5,
+                    dash="dashdot",
+                ),
+        ))
+    fig.update_shapes(dict(xref='x', yref='y'))
     if hawk_mode == 'sandbox':
-            fig.show()
+        fig.show()
     else:
         py.plot(fig, filename="monthly_spending", auto_open=False)
     return both_frames
@@ -559,6 +564,30 @@ def monthsTransactionTable(data, date, exclusions, hawk_mode):
     df = drop_columns(df)
     df = tidy_df(df, hawk_mode)
     df = df.sort_index()
+    print('Date: ', str(date))
+    print('date type: ', type(date))
+    print('monthTtable df: ', df)
+    print('type df: ', type(df))
+    print('index df: ', df.index)
+
+    try:
+        print('filtered df', df.loc[df.index >= str(date)])
+        df = df.loc[df.index >= str(date)]
+    except Exception as e:
+        print('date troubleshooting:')
+        print(e)
+    # try:
+    #     print(df[date:])
+    # except Exception as e:
+    #     print(e)
+    # try:
+    #     print(df[date])
+    # except Exception as e:
+    #     print(e)
+    # try:
+    #     print(df.loc[df.index >= date])
+    # except Exception as e:
+    #     print(e)
 
     df = df.loc[df.index >= date]
 
@@ -586,7 +615,9 @@ def chartLINK(filename):
 def tableChartHTML(data, date, exclusions, hawk_mode, chart_files):
     chartsHTML = ''
     for c in chart_files:
+        print('Chart File Loop: ', c)
         chart_link = chartLINK(c)
+        print('chart link loop: ', chart_link)
         chartHTML = htmlGraph(c)
         chartsHTML += chartHTML
         if 'topCategoryNameBarChart' in c:
@@ -606,11 +637,11 @@ def tableChartHTML(data, date, exclusions, hawk_mode, chart_files):
             chartHTML += header
             html_data = plt_data.to_frame().nlargest(5, 'amount')
             df_html_output = html_data.to_html().replace('<th>','<th style = "background-color: grey">')
-            chartHTML += df_html_output
+            chartsHTML += df_html_output
 
-
-        body = '\r\n\n<br>'.join('%s'%item for item in chartHTML)
-
+        # print('Chart HTML: ', chartsHTML)
+        body = '\r\n\n<br>'.join('%s'%item for item in chartsHTML)
+        # print('Body: ', body)
 
         return body
 
