@@ -90,6 +90,7 @@ def getTransactions(client, token, start_date, end_date):
 
     except plaid.errors.PlaidError as e:
         print(json.dumps({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } }))
+        print('full error: ', e)
         transactions = {'result': e.code}
         balance = {'result': e.code}
         return transactions, balance
@@ -145,17 +146,18 @@ def json2pandaClean(data, exclusions):
         try:
             dic_flattened = flatten(d)
             flat_list.append(dic_flattened)
+            df = pd.DataFrame(flat_list)
+            df["date"] = pd.to_datetime(df['date'])
+            df = df[~df['category_id'].isin(exclusions)]
+            df = df.set_index('date')
+            df = df.sort_index()
+            df = df.loc[df.pending == False]
         except:
             print('cant flatten: ', type(d))
             print(d)
-            pass
+            df = pd.DataFrame()
 
-    df = pd.DataFrame(flat_list)
-    df["date"] = pd.to_datetime(df['date'])
-    df = df[~df['category_id'].isin(exclusions)]
-    df = df.set_index('date')
-    df = df.sort_index()
-    df = df.loc[df.pending == False]
+
     return df
 
 def pandaSum(frame):
