@@ -138,9 +138,119 @@
         "item_id": "QbNXVno8ekUwagz3XdJDh1oQJGdQWGspgmnBN",
         "webhook": ""
     },
-    "request_id": "VTFtUNZGFcW6Gp8",
-    "total_transactions": 390,
+    "request_id": "OoPUkxjA5NoiNVd",
+    "total_transactions": 391,
     "transactions": [
+        {
+            "account_id": "MWxjwkML1miebk1mw6ZBILxeavzzRRf9BNgzv",
+            "account_owner": null,
+            "amount": 2078.5,
+            "category": [
+                "Payment"
+            ],
+            "category_id": "16000000",
+            "date": "2019-11-26",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": null,
+                "lat": null,
+                "lon": null,
+                "state": null,
+                "store_number": null,
+                "zip": null
+            },
+            "name": "AUTOMATIC PAYMENT - THANK",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "VRQa1KAnX9HEQwzbqvK5fqbPmXl7qEuW4NWnw",
+            "transaction_type": "special",
+            "unofficial_currency_code": null
+        },
+        {
+            "account_id": "MWxjwkML1miebk1mw6ZBILxeavzzRRf9BNgzv",
+            "account_owner": null,
+            "amount": 500,
+            "category": [
+                "Food and Drink",
+                "Restaurants"
+            ],
+            "category_id": "13005000",
+            "date": "2019-11-26",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": null,
+                "lat": null,
+                "lon": null,
+                "state": null,
+                "store_number": null,
+                "zip": null
+            },
+            "name": "KFC",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "DZW1RQaNrvTyqXgj4n85uoBEwvGKobtvgGvXb",
+            "transaction_type": "place",
+            "unofficial_currency_code": null
+        },
+        {
+            "account_id": "MWxjwkML1miebk1mw6ZBILxeavzzRRf9BNgzv",
+            "account_owner": null,
+            "amount": 500,
+            "category": [
+                "Shops",
+                "Sporting Goods"
+            ],
+            "category_id": "19046000",
+            "date": "2019-11-26",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": null,
+                "lat": null,
+                "lon": null,
+                "state": null,
+                "store_number": null,
+                "zip": null
+            },
+            "name": "Madison Bicycle Shop",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "XXMg1knmN9Uy9V5rGkXlu1NbW6Zp1etd48dxV",
+            "transaction_type": "place",
+            "unofficial_currency_code": null
+        },
         {
             "account_id": "QbNXVno8ekUwagz3XdJDh1oQjkVVnnTpxZQzM",
             "account_owner": null,
@@ -3706,43 +3816,6 @@
             "unofficial_currency_code": null
         },
         {
-            "account_id": "QbNXVno8ekUwagz3XdJDh1oQjkVVnnTpxZQzM",
-            "account_owner": null,
-            "amount": 25,
-            "category": [
-                "Payment",
-                "Credit Card"
-            ],
-            "category_id": "16001000",
-            "date": "2019-05-21",
-            "iso_currency_code": "USD",
-            "location": {
-                "address": null,
-                "city": null,
-                "lat": null,
-                "lon": null,
-                "state": null,
-                "store_number": null,
-                "zip": null
-            },
-            "name": "CREDIT CARD 3333 PAYMENT *//",
-            "payment_meta": {
-                "by_order_of": null,
-                "payee": null,
-                "payer": null,
-                "payment_method": null,
-                "payment_processor": null,
-                "ppd_id": null,
-                "reason": null,
-                "reference_number": null
-            },
-            "pending": false,
-            "pending_transaction_id": null,
-            "transaction_id": "Jgz4aoeZGmFXk8azyW1xflj7bdJodDid4Q8RM",
-            "transaction_type": "special",
-            "unofficial_currency_code": null
-        },
-        {
             "account_id": "eNrPaZVKqzIw8nL4VyAqhP39X1mmaatLNJZEb",
             "account_owner": null,
             "amount": 5.4,
@@ -3777,80 +3850,6 @@
             "pending": false,
             "pending_transaction_id": null,
             "transaction_id": "gjBPA1Vzr3HXQGWZVadkfwoM7ABjAPIgVL8A9",
-            "transaction_type": "special",
-            "unofficial_currency_code": null
-        },
-        {
-            "account_id": "1Xx4ynpveaUb4l19zdv8U8j9ryxxGGC5gNd31",
-            "account_owner": null,
-            "amount": 5850,
-            "category": [
-                "Transfer",
-                "Debit"
-            ],
-            "category_id": "21006000",
-            "date": "2019-05-20",
-            "iso_currency_code": "USD",
-            "location": {
-                "address": null,
-                "city": null,
-                "lat": null,
-                "lon": null,
-                "state": null,
-                "store_number": null,
-                "zip": null
-            },
-            "name": "ACH Electronic CreditGUSTO PAY 123456",
-            "payment_meta": {
-                "by_order_of": null,
-                "payee": null,
-                "payer": null,
-                "payment_method": "ACH",
-                "payment_processor": null,
-                "ppd_id": null,
-                "reason": null,
-                "reference_number": null
-            },
-            "pending": false,
-            "pending_transaction_id": null,
-            "transaction_id": "XXMg1knmN9Uy9V5rGkPdHDgwjmPblgfd61ANd",
-            "transaction_type": "special",
-            "unofficial_currency_code": null
-        },
-        {
-            "account_id": "ZlL8g3V9xJTjRELeV1XNt3LygDaaAAHg5PyzL",
-            "account_owner": null,
-            "amount": 1000,
-            "category": [
-                "Transfer",
-                "Deposit"
-            ],
-            "category_id": "21007000",
-            "date": "2019-05-20",
-            "iso_currency_code": "USD",
-            "location": {
-                "address": null,
-                "city": null,
-                "lat": null,
-                "lon": null,
-                "state": null,
-                "store_number": null,
-                "zip": null
-            },
-            "name": "CD DEPOSIT .INITIAL.",
-            "payment_meta": {
-                "by_order_of": null,
-                "payee": null,
-                "payer": null,
-                "payment_method": null,
-                "payment_processor": null,
-                "ppd_id": null,
-                "reason": null,
-                "reference_number": null
-            },
-            "pending": false,
-            "pending_transaction_id": null,
-            "transaction_id": "4q4avl8X3PSwbGmaXx7QhQRKLq49qetdrlyaE",
             "transaction_type": "special",
             "unofficial_currency_code": null
         }

@@ -66,60 +66,44 @@ data = dict(
 
 
 #Update Cumulative Chart
-rez = helpers.cumulativeSum(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
-print(rez)
+CS_link = helpers.cumulativeSum(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+print(CS_link)
 
 # Update Monthly Spending Chart
-rez = helpers.monthlySpending(master_data['all_trnsx'], exclusions, hawk_mode)
-print(rez)
+both_frames, MS_link = helpers.monthlySpending(master_data['all_trnsx'], exclusions, hawk_mode, 'Yes')
+print(MS_link)
 
 #Update 3 Month Average Comparison Number
 prog_pct = helpers.progress(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 print(prog_pct)
 #Update this Month's Category Chart
-rez = helpers.curMonthCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
-print(rez)
+CMC_link = helpers.curMonthCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+print(CMC_link)
 
 # HTML Tables for Most Spent Places in Top Categories
-topCatHTML = helpers.topCategoryName(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
-
+TC_link = helpers.topCategoryName(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+print(TC_link)
 
 #Update Category History Chart
-rez = helpers.categoryHistory(master_data['all_trnsx'], exclusions, hawk_mode)
-print(rez)
+catHistory_frame, CH_link = helpers.categoryHistory(master_data['all_trnsx'], exclusions, hawk_mode)
+print(CH_link)
 
 #Update Relative Category Chart
-rez = helpers.relativeCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
-print(rez)
+RC_link = helpers.relativeCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+print(RC_link)
 
 #Table HTML
 pending_HTML = helpers.pendingTable(master_data['all_trnsx'], exclusions)
 transaction_HTML = helpers.monthsTransactionTable(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 
-
-#charts_html = helpers.htmlGraph(os.getenv('PLOTLY_GRAPHS').split(","))
-
-#charts_and_tables_html = helpers.htmlTable(os.getenv('PLOTLY_TABLES').split(","), charts_html)
-
-
-
-# mail_data = helpers.generate_HTML(balance_chase, balance_schwab, charts_and_tables_html,\
-#                                  chase_total, schwab_total, cap1_total, \
-#
-#                                  lakes_balance, cap1_balance, topCatHTML)
-
-
-data['chart_pack']['chartHTML'] = helpers.tableChartHTML(master_data['all_trnsx'], month_start, exclusions, hawk_mode, chart_files)
+data['chart_pack']['chartHTML'] = helpers.tableChartHTML(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode, chart_files)
 pending = helpers.pendingTable(master_data['all_trnsx'], exclusions)
 months = helpers.monthsTransactionTable(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 data['chart_pack']['tableHTML'] = pending + months
 
-# print('ChartHTML: ', data['chart_pack']['chartHTML'])
-
 mail_data = helpers.jinjaTEST(data)
+
 helpers.emailPreview(mail_data)
-
-
 
 if hawk_mode == 'production' or hawk_mode == 'testing':
     with open('templates/email_preview.html', 'r') as f:
