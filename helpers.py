@@ -311,6 +311,7 @@ def cumulativeSum(data, date, exclusions, hawk_mode):
                 overlaying="y",
                 side="right"
             ))
+    fig.update_layout(template="ggplot2")
     try:
         if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
             URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
@@ -393,6 +394,7 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
                     ),
             ))
         fig.update_shapes(dict(xref='x', yref='y'))
+        fig.update_layout(template="ggplot2")
         if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
             URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
         else:
@@ -451,6 +453,7 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
                                         color='rgb(50, 171, 96)'),
                                 showarrow=False))
     fig.update_layout(annotations=annotations)
+    fig.update_layout(template="ggplot2")
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
@@ -492,6 +495,7 @@ def categorySubplots(data, date, exclusions, hawk_mode):
             textfont=dict(color="#C2C8C5"),
             orientation='h')
     fig.append_trace(category_summary_trace, 1, 1)
+    fig.update_layout(template="ggplot2")
 
     row = 2
 
@@ -533,6 +537,7 @@ def categorySubplots(data, date, exclusions, hawk_mode):
         row += 2
     fig['layout'].update(height=3000, width=1000)
     fig.update_yaxes(showticklabels=False)
+    fig.update_layout(template="ggplot2")
     if hawk_mode == 'sandbox'  or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
@@ -575,6 +580,7 @@ def categoryHistory(data, exclusions, hawk_mode):
                                         color='rgb(50, 171, 96)'),
                                 showarrow=False))
     fig.update_layout(annotations=annotations)
+    fig.update_layout(template="ggplot2")
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
@@ -629,6 +635,7 @@ def relativeCategories(data, date, exclusions, hawk_mode):
         bargap=0.15, # gap between bars of adjacent location coordinates.
         bargroupgap=0.1 # gap between bars of the same location coordinate.
     )
+    fig.update_layout(template="ggplot2")
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
@@ -723,6 +730,7 @@ def transactionTables(data, date, exclusions, hawk_mode):
     fig.append_trace(pending_trace, 2, 1)
 
     fig['layout'].update(height=1000, width=1000)
+    fig.update_layout(template="ggplot2")
 #     fig.update_yaxes(showticklabels=False)
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
