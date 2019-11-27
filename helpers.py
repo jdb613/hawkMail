@@ -300,36 +300,39 @@ def cumulativeSum(data, date, exclusions, hawk_mode):
             URL = py.plot(fig, filename="CumulativeSpending", auto_open=False)
         return URL
     except Exception as e:
-        return '{}% Chart Update Error'.format(filename)
+        return '{}% Chart Update Error'.format("CumulativeSpending")
 
 
 def monthlySpending(json, exclusions, hawk_mode, flag):
     tokens = plaidTokens()
-
+    chase_names = ['Chase']
+    schwab_names = ['Schwab']
+    all_names = chase_names + schwab_names
     sum_frame = json2pandaClean(json, exclusions)
     sum_frame = drop_columns(sum_frame)
     sum_frame = tidy_df(sum_frame, hawk_mode)
     print('Sum_frame: ', sum_frame)
     if hawk_mode == 'sandbox':
         client = SANDBOXplaidClient()
-
-        chase_frame = sum_frame[sum_frame['account'].isin([account['account_id'] for account in client.Accounts.get(tokens['Chase']['sandbox'])['accounts']])]
+        chase_acts = [account['account_id'] for account in client.Accounts.get(tokens['Chase']['sandbox'])['accounts']]
+        schwab_acts = [account['account_id'] for account in client.Accounts.get(tokens['Schwab']['sandbox'])['accounts']]
+        all_acts = chase_acts + schwab_acts
+        chase_frame = sum_frame[sum_frame['account'].isin(chase_acts)]
         print('chase_frame: ', chase_frame)
-        schwab_frame = sum_frame[sum_frame['account'].isin([account['account_id'] for account in client.Accounts.get(tokens['Schwab']['sandbox'])['accounts']])]
-        account_names = chase_frame + schwab_frame
-        both_frames = sum_frame[sum_frame['account'].isin(account_names)]
+        schwab_frame = sum_frame[sum_frame['account'].isin(schwab_acts)]
+        both_frames = sum_frame[sum_frame['account'].isin(all_acts)]
         print('Monthly Spending Both Frames Size: ', both_frames.describe())
     else:
         client = plaidClient()
-        account_names = ['Chase, Schwab']
-        chase_frame = sum_frame[sum_frame['account'].isin(account_names)]
+
+        chase_frame = sum_frame[sum_frame['account'].isin(chase_names)]
         print('chase_frame: ', chase_frame)
-        schwab_frame = sum_frame[sum_frame['account'].isin(account_names)]
-        both_frames = sum_frame[sum_frame['account'].isin(account_names)]
+        schwab_frame = sum_frame[sum_frame['account'].isin(schwab_names)]
+        both_frames = sum_frame[sum_frame['account'].isin(all_names)]
         print('Monthly Spending Both Frames Size: ', both_frames.describe())
 
-    Cmonthly_sum = schwab_frame.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
-    Smonthly_sum = chase_frame.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
+    Smonthly_sum = schwab_frame.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
+    Cmonthly_sum = chase_frame.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
     both_frames = both_frames.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
     print('Resample Monthly Spending Both Frames Size: ', both_frames.describe())
     cc_payments = paymentFinder(json)
@@ -412,9 +415,9 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
                 y=df_fram.index.tolist(),
                 x=df_fram.amount.values.tolist(),
                 marker=dict(
-                color='rgba(58, 71, 80, 0.6)',
+                color='#4A707A',
                 line=dict(
-                    color='rgba(58, 71, 80, 0.6)',
+                    color='#94BOB7',
                     width=1),
                     ),
                 orientation='h')
