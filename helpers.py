@@ -157,7 +157,7 @@ def json2pandaClean(data, exclusions):
             df = df[~df['category_id'].isin(exclusions)]
             df = df.set_index('date')
             df = df.sort_index()
-            df = df.loc[df.pending == False]
+            # df = df.loc[df.pending == False]
         except:
             print('cant flatten: ', type(d))
             print(d)
@@ -269,6 +269,7 @@ def getData(environment, exclusions):
 
 def cumulativeSum(data, date, exclusions, hawk_mode):
     df = json2pandaClean(data, exclusions)
+    df = df.loc[df.pending == False]
     month_trnsx = df.loc[df.index >= date]
     month_trnsx1 = month_trnsx.resample('D')['amount'].sum().reset_index()
     month_trnsx1['CUMSUM'] = month_trnsx1['amount'].cumsum()
@@ -326,6 +327,7 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
     schwab_names = ['Schwab']
     all_names = chase_names + schwab_names
     sum_frame = json2pandaClean(json, exclusions)
+    sum_frame = sum_frame.loc[df.pending == False]
     sum_frame = drop_columns(sum_frame)
     sum_frame = tidy_df(sum_frame, hawk_mode)
     print('Sum_frame: ', sum_frame)
@@ -401,6 +403,7 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
 
 def progress(json, date, exclusions, hawk_mode):
     lcl_df = json2pandaClean(json, exclusions)
+    lcl_df = lcl_df.loc[lcl_df.pending == False]
     monthly_spending_df, URL = monthlySpending(json, exclusions, hawk_mode, 'No')
     print('Monthly Spending')
     print(monthly_spending_df)
@@ -416,6 +419,7 @@ def progress(json, date, exclusions, hawk_mode):
 
 def curMonthCategories(data, date, exclusions, hawk_mode):
     df1 = json2pandaClean(data, exclusions)
+    df1 = df1.loc[df1.pending == False]
     cat_df = df1.loc[df1.index >= date]
     cat_df = cat_df.groupby('category_1')["amount"].sum()
     df_fram = cat_df.to_frame()
@@ -455,6 +459,7 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
 
 def categorySubplots(data, date, exclusions, hawk_mode):
     df = json2pandaClean(data, exclusions)
+    df = df.loc[df.pending == False]
     df1 = drop_columns(df)
     df2 = tidy_df(df1, hawk_mode)
     df3 = df2.loc[monthStart():]
@@ -538,6 +543,7 @@ def categorySubplots(data, date, exclusions, hawk_mode):
 
 def categoryHistory(data, exclusions, hawk_mode):
     df1 = json2pandaClean(data, exclusions)
+    df1 = df1.loc[df1.pending == False]
     cat_df = df1.groupby('category_1')["amount"].sum()
     df_fram = cat_df.to_frame()
     df_fram = df_fram[-15:].sort_values(by='amount', ascending=True)
@@ -578,6 +584,7 @@ def categoryHistory(data, exclusions, hawk_mode):
 
 def relativeCategories(data, date, exclusions, hawk_mode):
     df1 = json2pandaClean(data, exclusions)
+    df1 = df1.loc[df1.pending == False]
     df1 = drop_columns(df1)
     df1 = tidy_df(df1, hawk_mode)
 
