@@ -19,7 +19,7 @@ from sendgrid import SendGridAPIClient
 import python_http_client
 
 import chart_studio
-import plotly
+import plotly as plotly
 import chart_studio.plotly as py
 import plotly.graph_objects as go
 import plotly.io as pio
@@ -38,10 +38,7 @@ chart_files = [x.strip(' ') for x in chart_files]
 
 hawk_mode = str(os.getenv('HAWK_MODE'))
 print('Currently Running in {}'.format(hawk_mode))
-print('exclusions: ', type(exclusions))
-print(exclusions)
-print('chart files: ', type(chart_files))
-print(chart_files)
+
 tokens = helpers.plaidTokens()
 
 start_of_month = helpers.monthStart()
@@ -67,43 +64,40 @@ data = dict(
 
 #Update Cumulative Chart
 CS_link = helpers.cumulativeSum(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
-print(CS_link)
 
 # Update Monthly Spending Chart
 both_frames, MS_link = helpers.monthlySpending(master_data['all_trnsx'], exclusions, hawk_mode, 'Yes')
-print(MS_link)
 
 #Update 3 Month Average Comparison Number
 prog_pct = helpers.progress(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 print(prog_pct)
 #Update this Month's Category Chart
 CMC_link = helpers.curMonthCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
-print(CMC_link)
 
 # HTML Tables for Most Spent Places in Top Categories
-TC_link = helpers.topCategoryName(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
-print(TC_link)
+# TC_link = helpers.topCategoryName(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+# print(TC_link)
+TC_link = helpers.categorySubplots(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 
 #Update Category History Chart
 catHistory_frame, CH_link = helpers.categoryHistory(master_data['all_trnsx'], exclusions, hawk_mode)
-print(CH_link)
 
 #Update Relative Category Chart
 RC_link = helpers.relativeCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
-print(RC_link)
 
 #Table HTML
-pending_HTML = helpers.pendingTable(master_data['all_trnsx'], exclusions)
-transaction_HTML = helpers.monthsTransactionTable(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+# pending_HTML = helpers.pendingTable(master_data['all_trnsx'], exclusions)
+TT_Link = helpers.transactionTables(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+
 
 data['chart_pack']['chartHTML'] = helpers.tableChartHTML(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode, chart_files)
-pending = helpers.pendingTable(master_data['all_trnsx'], exclusions)
-months = helpers.monthsTransactionTable(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
-data['chart_pack']['tableHTML'] = pending + months
+# pending = helpers.pendingTable(master_data['all_trnsx'], exclusions)
+# months = helpers.monthsTransactionTable(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+# data['chart_pack']['tableHTML'] = pending + months
+data['chart_pack']['divs'] = [CS_link, MS_link, CMC_link, TC_link, CH_link, RC_link, TT_Link]
+mail_data = helpers.jinjaTEST(data, hawk_mode)
 
-mail_data = helpers.jinjaTEST(data)
-
-helpers.emailPreview(mail_data)
+helpers.emailPreview(mail_data, hawk_mode)
 
 if hawk_mode == 'production' or hawk_mode == 'testing':
     with open('templates/email_preview.html', 'r') as f:
@@ -130,5 +124,5 @@ else:
 
     binary = FirefoxBinary('/Applications/Firefox.app/Contents/MacOS/firefox-bin')
     browser = webdriver.Firefox(firefox_binary=binary, executable_path='/Users/jdb/.pyenv/versions/3.8.0/envs/hawkMailENV/bin/geckodriver')
-    browser.get("file:///Users/jdb/Documents/Jeff/Apps/Finances/hawkMail/templates/email_preview.html")
+    browser.get("file:///Users/jdb/Documents/Jeff/Apps/Finances/hawkMail/templates/sandbox_preview.html")
 

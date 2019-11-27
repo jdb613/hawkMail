@@ -3,7 +3,9 @@ import pandas as pd
 from datetime import datetime, timedelta, date
 import chart_studio.plotly as py
 import plotly.graph_objects as go
+import plotly as plotly
 import chart_studio
+from plotly.subplots import make_subplots
 import plaid
 from plaid.errors import APIError, ItemError
 import requests
@@ -202,6 +204,22 @@ def paymentFinder(json):
     monthly_sum = df.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
     return monthly_sum
 
+def currencyConvert(x):
+    return '${:,.2f}'.format(x)
+
+def tableTidy(df, hawk_mode):
+    df = drop_columns(df)
+    df = tidy_df(df, hawk_mode)
+    df = df.sort_index()
+    df = df.reset_index()
+    if df.empty == False:
+        print('False')
+        df['date'] = df['date'].dt.strftime('%m/%d/%y')
+        df['name'] = df['name'].str.capitalize()
+        df['amount'] = df['amount'].apply(currencyConvert)
+    df.columns = map(str.capitalize, df.columns)
+    return df
+
 def getData(environment, exclusions):
     master_data = {}
     tokens = plaidTokens()
@@ -214,7 +232,7 @@ def getData(environment, exclusions):
         cap1_response = cap1_lakes_get(SANDBOXplaidClient(), tokens['Capital_One']['sandbox'], start_date, today_str)
         lakes_response = cap1_lakes_get(SANDBOXplaidClient(), tokens['Great_Lakes']['sandbox'], start_date, today_str)
 
-    elif environment == 'testing':
+    elif environment == 'testing' or environment == 'local_testing':
         start_date = date.today() - timedelta(days=30)
         trnsx_chase, master_data['balance_chase'] = getTransactions(plaidClient(), tokens['Chase']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
         trnsx_schwab, master_data['balance_schwab'] = getTransactions(plaidClient(), tokens['Schwab']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
@@ -293,9 +311,8 @@ def cumulativeSum(data, date, exclusions, hawk_mode):
                 side="right"
             ))
     try:
-        if hawk_mode == 'sandbox':
-            fig.show()
-            URL = 'Sandbox'
+        if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
+            URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
         else:
             URL = py.plot(fig, filename="CumulativeSpending", auto_open=False)
         return URL
@@ -374,16 +391,12 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
                     ),
             ))
         fig.update_shapes(dict(xref='x', yref='y'))
-        if hawk_mode == 'sandbox':
-            fig.show()
-            URL = 'Sandbox'
+        if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
+            URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
         else:
             URL = py.plot(fig, filename="monthly_spending", auto_open=False)
     else:
-        if hawk_mode == 'sandbox':
-            URL = 'Sandbox'
-        else:
-            URL = 'Update Not Requested'
+        URL = 'Update Not Requested'
     return both_frames, URL
 
 def progress(json, date, exclusions, hawk_mode):
@@ -434,42 +447,93 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
                                         color='rgb(50, 171, 96)'),
                                 showarrow=False))
     fig.update_layout(annotations=annotations)
-    if hawk_mode == 'sandbox':
-        fig.show()
-        URL = 'Sandbox'
+    if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
+        URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
         URL = py.plot(fig, filename="CurrentMonthCategory", auto_open=False)
     return URL
 
-def topCategoryName(data, date, exclusions, hawk_mode):
-    HTML = []
-    frame = json2pandaClean(data, exclusions)
-    frame = drop_columns(frame)
-    frame = tidy_df(frame, hawk_mode)
-    frame = frame.loc[date:]
-    category_df = frame.groupby('category_0')['amount'].sum().nlargest(5)
-    print('Category DF: ', category_df)
+def categorySubplots(data, date, exclusions, hawk_mode):
+    df = json2pandaClean(data, exclusions)
+    df1 = drop_columns(df)
+    df2 = tidy_df(df1, hawk_mode)
+    df3 = df2.loc[monthStart():]
+    category_df = df3.groupby('category_0')['amount'].sum().nlargest(5)
+
+    titles = ['Top Categories This Month']
     for i in range(len(category_df)):
+        titles.append(category_df.index[i])
+        titles.append(category_df.index[i] + str(' Table'))
 
-        cat_data = frame[frame['category_0'] == category_df.index[i]]
 
-        plt_data = cat_data.groupby('name')['amount'].sum().sort_values()[-25:]
-        print('Updating Top Category Name Chart {}%'.format(i))
-        fig = go.Figure(go.Bar(
+    fig = make_subplots(rows=11, cols=1, subplot_titles=titles, vertical_spacing=0.02,
+                    specs=[[{"type": "bar"}],
+                            [{"type": "bar"}],
+                            [{"type": "table"}],
+                            [{"type": "bar"}],
+                            [{"type": "table"}],
+                            [{"type": "bar"}],
+                            [{"type": "table"}],
+                            [{"type": "bar"}],
+                            [{"type": "table"}],
+                            [{"type": "bar"}],
+                            [{"type": "table"}]])
+
+    category_summary_trace = go.Bar(
+            x=[locale.currency(j) for j in category_df.values.tolist()],
+            y=category_df.index.tolist(),
+            text=category_df.index.tolist(),
+            textposition='auto',
+            textfont=dict(color="#C2C8C5"),
+            orientation='h')
+    fig.append_trace(category_summary_trace, 1, 1)
+
+    row = 2
+
+    for i in range(len(category_df)):
+        cat_data = df3[df3['category_0'] == category_df.index[i]]
+        table_data = cat_data.reset_index()
+        table_data['date'] = table_data['date'].dt.strftime('%m/%d/%y')
+        table_data['name'] = table_data['name'].str.capitalize()
+        table_data['amount'] = table_data['amount'].apply(currencyConvert)
+        table_data.columns = map(str.capitalize, table_data.columns)
+
+        plt_data = cat_data.groupby('name')['amount'].sum().sort_values()[-15:]
+
+        print('Updating Top Category: {}'.format(category_df.index[i]))
+
+        bar_trace = go.Bar(
+                text = ['<b>' + i + '</b>' for i in plt_data.index.tolist()],
+                textposition='auto',
+                textfont=dict(color="white", size=14),
                 x=[locale.currency(j) for j in plt_data.values.tolist()],
                 y=plt_data.index.tolist(),
-                orientation='h'))
-        fig.update_layout(
-            title=category_df.index[i])
-        filename = 'topCategoryNameBarChart' + str(i)
-        if hawk_mode == 'sandbox':
-            fig.show()
-            URL = 'Sandbox'
-        else:
-            URL = py.plot(fig, filename=filename, auto_open=False)
+                marker=dict(color='#4A707A'),
+                orientation='h')
+
+        table_trace = go.Table(
+            header=dict(
+                values=table_data.columns.tolist(),
+                font=dict(size=15),
+                align="left"
+            ),
+            cells=dict(
+                values=[table_data[k].tolist() for k in table_data.columns],
+                align = "left")
+        )
+
+        fig.append_trace(bar_trace, row, 1)
+        fig.append_trace(table_trace, row+1, 1)
+
+        row += 2
+    fig['layout'].update(height=3000, width=1000)
+    fig.update_yaxes(showticklabels=False)
+    if hawk_mode == 'sandbox'  or hawk_mode == 'local_testing':
+        URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
+    else:
+        filename='CategorySubplots'
+        URL = py.plot(fig, filename=filename, auto_open=False)
     return URL
-
-
 
 
 def categoryHistory(data, exclusions, hawk_mode):
@@ -505,9 +569,8 @@ def categoryHistory(data, exclusions, hawk_mode):
                                         color='rgb(50, 171, 96)'),
                                 showarrow=False))
     fig.update_layout(annotations=annotations)
-    if hawk_mode == 'sandbox':
-        fig.show()
-        URL = 'Sandbox'
+    if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
+        URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
         URL = py.plot(fig, filename="CurrentMonthCategory", auto_open=False)
 
@@ -559,9 +622,8 @@ def relativeCategories(data, date, exclusions, hawk_mode):
         bargap=0.15, # gap between bars of adjacent location coordinates.
         bargroupgap=0.1 # gap between bars of the same location coordinate.
     )
-    if hawk_mode == 'sandbox':
-            fig.show()
-            URL = 'sandbox'
+    if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
+        URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
         URL = py.plot(fig, filename="RelativeCategory", auto_open=False)
     return URL
@@ -610,91 +672,57 @@ def plotlyCategoryHistory_Update(frame):
     py.plot(fig, filename="ALLMonthCategory.html", auto_open=False)
     return 'Plotly Category History Chart Updated'
 
-
-
-def plotlyTtable(frame):
-    values = list(frame.columns)
-    values.insert(0, 'date')
-    fig = go.Figure()
-    fig.add_trace(
-        go.Table(
-            header=dict(values=values,
-                    fill_color='paleturquoise',
-                    align='left'),
-        cells=dict(values=[frame.index, frame.name, frame.amount, frame.category_0, frame.category_1, frame.category_2, frame.location_city, frame.location_state, frame.account_id, frame.transaction_type],
-                   fill_color='lavender',
-                   align='left')
-        ))
-
-    fig.update_layout(title_text="This Month's Transactions")
-    py.plot(fig, filename="MonthlyTable.html", auto_open=False)
-    return 'Success'
-
-def plotlyPtable(frame):
-    values = list(frame.columns)
-    values.insert(0, 'date')
-    fig = go.Figure()
-    fig.add_trace(
-        go.Table(
-            header=dict(values=values,
-                    fill_color='paleturquoise',
-                    align='left'),
-        cells=dict(values=[frame.index, frame.name, frame.amount, frame.category_0, frame.category_1, frame.category_2, frame.location_city, frame.location_state, frame.account_id, frame.transaction_type],
-                   fill_color='lavender',
-                   align='left')
-        ))
-
-    fig.update_layout(title_text="Pending Transactions")
-    py.plot(fig, filename="PendingTable.html", auto_open=False)
-    return 'Success'
-
-def pendingTable(data, exclusions):
+def transactionTables(data, date, exclusions, hawk_mode):
+    print('Date: ', datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y'))
     df = json2pandaClean(data, exclusions)
-    df = df.loc[df.pending == True]
-    df = drop_columns(df)
-    df = tidy_df(df, hawk_mode)
-    df = df.sort_index()
+    df_pending = df.loc[df.pending == True]
+    df_posted = df.loc[df.pending == False]
+    print('******** Pending ************')
+    df_pending_tidy = tableTidy(df_pending, hawk_mode)
+    print('******** Posted ************')
+    df_posted_tidy = tableTidy(df_posted, hawk_mode)
+    print('Pre Date Filter Posted')
+    print(df_posted_tidy)
+    df_posted_tidy = df_posted_tidy.loc[df_posted_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
+    print('Final Posted')
+    print(df_posted_tidy)
 
+    titles = ['Posted', 'Pending']
+    fig = make_subplots(rows=2, cols=1, subplot_titles=titles, vertical_spacing=0.05,
+                   specs=[[{"type": "table"}],
+                          [{"type": "table"}]])
+    posted_trace = go.Table(
+        header=dict(
+            values=df_posted_tidy.columns.tolist(),
+            font=dict(size=15),
+            align="left"
+        ),
+        cells=dict(
+            values=[df_posted_tidy[k].tolist() for k in df_posted_tidy.columns],
+            align = "left")
+    )
+    pending_trace = go.Table(
+        header=dict(
+            values=df_pending_tidy.columns.tolist(),
+            font=dict(size=15),
+            align="left"
+        ),
+        cells=dict(
+            values=[df_pending_tidy[k].tolist() for k in df_pending_tidy.columns],
+            align = "left")
+    )
 
-    data_in_html = df.to_html(index=True)
-    total_id = 'totalID'
-    header_id = 'headerID'
-    style_in_html = """<style>
-        table#{total_table} {{color='black';font-size:13px; text-align:center; border:0.2px solid black;
-                            border-collapse:collapse; table-layout:fixed; height="250"; text-align:center }}
-        thead#{header_table} {{background-color: #4D4D4D; color:#ffffff}}
-        </style>""".format(total_table=total_id, header_table=header_id)
-    data_in_html = re.sub(r'<table', r'<table id=%s ' % total_id, data_in_html)
-    data_in_html = re.sub(r'<thead', r'<thead id=%s ' % header_id, data_in_html)
+    fig.append_trace(posted_trace, 1, 1)
+    fig.append_trace(pending_trace, 2, 1)
 
-    return data_in_html
+    fig['layout'].update(height=1000, width=1000)
+#     fig.update_yaxes(showticklabels=False)
+    if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
+        URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
+    else:
+        URL = py.plot(fig, filename="TransactionTableSubplots", auto_open=False)
+    return URL
 
-def monthsTransactionTable(data, date, exclusions, hawk_mode):
-    df = json2pandaClean(data, exclusions)
-    df = df.loc[df.pending == False]
-    df = drop_columns(df)
-    df = tidy_df(df, hawk_mode)
-    df = df.sort_index()
-
-    try:
-        print('filtered df', df.loc[df.index >= str(date)])
-        df = df.loc[df.index >= str(date)]
-    except Exception as e:
-        print('date troubleshooting:')
-        print(e)
-
-    data_in_html = df.to_html(index=True)
-    total_id = 'totalID'
-    header_id = 'headerID'
-    style_in_html = """<style>
-        table#{total_table} {{color='black';font-size:13px; text-align:center; border:0.2px solid black;
-                            border-collapse:collapse; table-layout:fixed; height="250"; text-align:center }}
-        thead#{header_table} {{background-color: #4D4D4D; color:#ffffff}}
-        </style>""".format(total_table=total_id, header_table=header_id)
-    data_in_html = re.sub(r'<table', r'<table id=%s ' % total_id, data_in_html)
-    data_in_html = re.sub(r'<thead', r'<thead id=%s ' % header_id, data_in_html)
-
-    return data_in_html
 
 def chartLINK(filename):
     try:
@@ -710,28 +738,6 @@ def tableChartHTML(data, date, exclusions, hawk_mode, chart_files):
         chart_link = chartLINK(c)
         chartHTML = htmlGraph(chart_link)
         chartsHTML += chartHTML
-        if 'topCategoryNameBarChart' in c and hawk_mode != 'sandbox':
-
-            frame = json2pandaClean(data, exclusions)
-            frame = drop_columns(frame)
-            frame = tidy_df(frame, hawk_mode)
-            frame = frame.loc[date:]
-            category_df = frame.groupby('category_0')['amount'].sum().nlargest(5)
-
-            fig = py.get_figure(c)
-            title = fig['layout']['title']
-            cat_data = frame[frame['category_0'] == title]
-
-            plt_data = cat_data.groupby('name')['amount'].sum().sort_values()
-            header = '<h2>' + str(title) + '</h2>'
-            chartHTML += header
-            html_data = plt_data.to_frame().nlargest(5, 'amount')
-            df_html_output = html_data.to_html().replace('<th>','<th style = "background-color: grey">')
-            chartsHTML += df_html_output
-
-        # print('Chart HTML: ', chartsHTML)
-        # body = '\r\n\n<br>'.join('%s'%item for item in chartsHTML)
-        # print('Body: ', body)
 
     return chartsHTML
 
@@ -772,26 +778,6 @@ def htmlGraph(graph):
     email_body += _
     return email_body
 
-def htmlTable(tables, html_body):
-    template = (''
-    '<a href="{graph_url}" target="_blank">' # Open the interactive graph when you click on the image
-        '<img src="{graph_url}.png">'        # Use the ".png" magic url so that the latest, most-up-to-date image is included
-    '</a>'
-    '{caption}'                              # Optional caption to include below the graph
-    '<br>'                                   # Line break
-    '<a href="{graph_url}" style="color: rgb(190,190,190); text-decoration: none; font-weight: 200;" target="_blank">'
-        'Click to comment and see the interactive graph'  # Direct readers to Plotly for commenting, interactive graph
-    '</a>'
-    '<br>'
-    '<hr>'                                   # horizontal line
-    '')
-
-    for table in tables:
-        _ = template
-        _ = _.format(graph_url=table, caption='')
-        html_body += _
-    return html_body
-
 
 def generate_HTML(balance_chase, balance_schwab, charts_tables, chase_total, schwab_total, cap1_total, balance_great_lakes, balance_cap_one, topCatHTML):
     # Create the jinja2 environment.
@@ -811,16 +797,27 @@ def generate_HTML(balance_chase, balance_schwab, charts_tables, chase_total, sch
     )
     return template_ready
 
-def jinjaTEST(data):
+def jinjaTEST(data, hawk_mode):
     j2_env = Environment(loader=FileSystemLoader('./templates'),
                          trim_blocks=True)
-    template_ready = j2_env.get_template('newhawk.html').render(
+    if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
+        template_ready = j2_env.get_template('sandbox.html').render(
         jinja_data=data
     )
+    else:
+        template_ready = j2_env.get_template('newhawk.html').render(
+            jinja_data=data
+        )
 
     return template_ready
 
-def emailPreview(mail):
-    prev = open('templates/email_preview.html','w')
-    prev.write(mail)
-    prev.close()
+def emailPreview(mail, hawk_mode):
+    if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
+        prev = open('templates/sandbox_preview.html','w')
+        prev.write(mail)
+        prev.close()
+    else:
+        prev = open('templates/email_preview.html','w')
+        prev.write(mail)
+        prev.close()
+    return 'Preview File Updated'
