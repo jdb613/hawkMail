@@ -327,7 +327,7 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
     schwab_names = ['Schwab']
     all_names = chase_names + schwab_names
     sum_frame = json2pandaClean(json, exclusions)
-    sum_frame = sum_frame.loc[df.pending == False]
+    sum_frame = sum_frame.loc[sum_frame.pending == False]
     sum_frame = drop_columns(sum_frame)
     sum_frame = tidy_df(sum_frame, hawk_mode)
     print('Sum_frame: ', sum_frame)
