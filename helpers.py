@@ -417,7 +417,7 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
                 marker=dict(
                 color='#4A707A',
                 line=dict(
-                    color='#94BOB7',
+                    color='green',
                     width=1),
                     ),
                 orientation='h')
@@ -448,6 +448,7 @@ def topCategoryName(data, date, exclusions, hawk_mode):
     frame = tidy_df(frame, hawk_mode)
     frame = frame.loc[date:]
     category_df = frame.groupby('category_0')['amount'].sum().nlargest(5)
+    print('Category DF: ', category_df)
     for i in range(len(category_df)):
 
         cat_data = frame[frame['category_0'] == category_df.index[i]]

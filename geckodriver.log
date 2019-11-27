@@ -254,3 +254,11 @@ console.error: (new Error("Transaction canceled due to a closed connection.", "r
 1574792580972	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
 1574792582563	Marionette	INFO	Listening on port 63240
 1574792582656	Marionette	WARN	TLS certificate errors will be ignored for this session
+1574816191574	Marionette	INFO	Stopped listening on port 63240
+1574834234506	mozrunner::runner	INFO	Running command: "/Applications/Firefox.app/Contents/MacOS/firefox-bin" "-marionette" "-foreground" "-no-remote" "-profile" "/var/folders/pz/6z9pght940zdtg2xz9799w3c0000gn/T/rust_mozprofilei4D5Ue"
+1574834235022	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1574834235022	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1574834235022	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1574834235022	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1574834236638	Marionette	INFO	Listening on port 50777
+1574834236667	Marionette	WARN	TLS certificate errors will be ignored for this session
