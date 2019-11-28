@@ -49,15 +49,15 @@ print(clear_file)
 #Data from Plaid
 master_data = helpers.getData(hawk_mode, exclusions)
 data = dict(
-    date=date.today().strftime('%m/%d/%y'),
-    balance_chase=master_data['balance_chase'],
-    chase_total=master_data['chase_total'],
-    balance_schwab=master_data['balance_schwab'],
-    schwab_total= master_data['schwab_total'],
-    balance_cap_one=  master_data['cap1_balance'],
-    capone_total='<BETA>',
-    balance_great_lakes=master_data['lakes_balance'],
-    greatlakes_total='<BETA>',
+    date = date.today().strftime('%m/%d/%y'),
+    balance_chase = master_data['balance_chase'],
+    chase_total = master_data['chase_total'],
+    balance_schwab = master_data['balance_schwab'],
+    schwab_total = master_data['schwab_total'],
+    balance_cap_one =  master_data['cap1_balance'],
+    capone_total = master_data['cap1_total'],
+    balance_great_lakes = master_data['lakes_balance'],
+    greatlakes_total = master_data['lakes_total'],
     chart_pack = {}
 )
 

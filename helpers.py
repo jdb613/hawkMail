@@ -136,7 +136,7 @@ def lakesData(data):
     for p in pmt_list:
         pmt_totals += int(p['amount'])
 
-    return balance_sum, pmt_totals
+    return currencyConvert(balance_sum), currencyConvert(pmt_totals)
 
 
 def json2pandaClean(data, exclusions):
@@ -280,10 +280,7 @@ def cumulativeSum(data, date, exclusions, hawk_mode):
             go.Scatter(name='Cumulative Spending', x=month_trnsx1.index.tolist(), y=month_trnsx1.CUMSUM.tolist(), yaxis="y2"),
             go.Bar(name='Daily Spend', x=month_trnsx1.index.tolist(), y=month_trnsx1.amount.tolist(),
                 text = [str('<b>' + locale.currency(i) + '</b>') for i in month_trnsx1.amount.tolist()],
-                textposition='auto',
-                    textfont=dict(
-                    color="yellow"
-                    ))
+                textposition='auto')
         ],
         layout=go.Layout(
             title=go.layout.Title(text="Cumulative Spending")
@@ -291,22 +288,10 @@ def cumulativeSum(data, date, exclusions, hawk_mode):
     fig.update_xaxes(nticks=len(month_trnsx1), tickangle=45)
     fig.update_layout(
             yaxis=dict(
-                title="Daily Spend",
-                titlefont=dict(
-                    color="#d50301"
-                    ),
-            tickfont=dict(
-                    color="#d50301"
-                )
+                title="Daily Spend"
             ),
             yaxis2=dict(
                 title="Cumulative Spending",
-                titlefont=dict(
-                    color="#0400fb"
-                ),
-                tickfont=dict(
-                    color="#0400fb"
-                ),
                 anchor="x",
                 overlaying="y",
                 side="right"
@@ -386,12 +371,7 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
                     x0= start ,
                     y0=cc_payments.iloc[i].amount,
                     x1=start,
-                    y1=cc_payments.iloc[i].amount,
-                    line=dict(
-                        color="LightSeaGreen",
-                        width=5,
-                        dash="dashdot",
-                    ),
+                    y1=cc_payments.iloc[i].amount
             ))
         fig.update_shapes(dict(xref='x', yref='y'))
         fig.update_layout(template="ggplot2")
@@ -436,8 +416,7 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
                 marker=dict(
                 color='#4A707A',
                 line=dict(
-                    color='green',
-                    width=1),
+                    width=1)
                     ),
                 orientation='h')
             ],
@@ -449,8 +428,7 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
         annotations.append(dict(xref='x1', yref='y1',
                                 y=yd, x=xd + 100,
                                 text=locale.currency(xd),
-                                font=dict(family='Arial', size=12,
-                                        color='rgb(50, 171, 96)'),
+                                font=dict(family='Arial', size=12),
                                 showarrow=False))
     fig.update_layout(annotations=annotations)
     fig.update_layout(template="ggplot2")
@@ -492,7 +470,6 @@ def categorySubplots(data, date, exclusions, hawk_mode):
             y=category_df.index.tolist(),
             text=category_df.index.tolist(),
             textposition='auto',
-            textfont=dict(color="#C2C8C5"),
             orientation='h')
     fig.append_trace(category_summary_trace, 1, 1)
     fig.update_layout(template="ggplot2")
@@ -514,10 +491,8 @@ def categorySubplots(data, date, exclusions, hawk_mode):
         bar_trace = go.Bar(
                 text = ['<b>' + i + '</b>' for i in plt_data.index.tolist()],
                 textposition='auto',
-                textfont=dict(color="white", size=14),
                 x=[locale.currency(j) for j in plt_data.values.tolist()],
                 y=plt_data.index.tolist(),
-                marker=dict(color='#4A707A'),
                 orientation='h')
 
         table_trace = go.Table(
@@ -535,7 +510,6 @@ def categorySubplots(data, date, exclusions, hawk_mode):
         fig.append_trace(table_trace, row+1, 1)
 
         row += 2
-    fig['layout'].update(height=3000, width=1000)
     fig.update_yaxes(showticklabels=False)
     fig.update_layout(template="ggplot2")
     if hawk_mode == 'sandbox'  or hawk_mode == 'local_testing':
@@ -560,12 +534,6 @@ def categoryHistory(data, exclusions, hawk_mode):
                 name="Category Spend Historically",
                 y=df_fram.index.tolist(),
                 x=df_fram.amount.values.tolist(),
-                marker=dict(
-                color='rgba(58, 71, 80, 0.6)',
-                line=dict(
-                    color='rgba(58, 71, 80, 0.6)',
-                    width=1),
-                    ),
                 orientation='h')
             ],
         layout=go.Layout(
@@ -576,9 +544,7 @@ def categoryHistory(data, exclusions, hawk_mode):
         annotations.append(dict(xref='x1', yref='y1',
                                 y=yd, x=xd + 100,
                                 text=locale.currency(xd),
-                                font=dict(family='Arial', size=12,
-                                        color='rgb(50, 171, 96)'),
-                                showarrow=False))
+                                font=dict(family='Arial', size=12)))
     fig.update_layout(annotations=annotations)
     fig.update_layout(template="ggplot2")
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
@@ -608,13 +574,11 @@ def relativeCategories(data, date, exclusions, hawk_mode):
     fig = go.Figure()
     fig.add_trace(go.Bar(x=comb.index.tolist(),
                     y=comb['This Month'].tolist(),
-                    name='This Month',
-                    marker_color='rgb(55, 83, 109)'
+                    name='This Month'
                     ))
     fig.add_trace(go.Bar(x=comb.index.tolist(),
                     y=comb['Average'].tolist(),
-                    name='Average',
-                    marker_color='rgb(26, 118, 255)'
+                    name='Average'
                     ))
 
     fig.update_layout(
@@ -627,9 +591,7 @@ def relativeCategories(data, date, exclusions, hawk_mode):
         ),
         legend=dict(
             x=0,
-            y=1.0,
-            bgcolor='rgba(255, 255, 255, 0)',
-            bordercolor='rgba(255, 255, 255, 0)'
+            y=1.0
         ),
         barmode='group',
         bargap=0.15, # gap between bars of adjacent location coordinates.
@@ -729,7 +691,6 @@ def transactionTables(data, date, exclusions, hawk_mode):
     fig.append_trace(posted_trace, 1, 1)
     fig.append_trace(pending_trace, 2, 1)
 
-    fig['layout'].update(height=1000, width=1000)
     fig.update_layout(template="ggplot2")
 #     fig.update_yaxes(showticklabels=False)
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':

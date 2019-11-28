@@ -345,3 +345,18 @@ JavaScript error: file:///Users/jdb/Documents/Jeff/Apps/Finances/hawkMail/templa
 1574889186984	Marionette	INFO	Listening on port 58611
 1574889187023	Marionette	WARN	TLS certificate errors will be ignored for this session
 JavaScript error: file:///Users/jdb/Documents/Jeff/Apps/Finances/hawkMail/templates/sandbox_preview.html, line 331: TypeError: t is undefined
+1574898866426	mozrunner::runner	INFO	Running command: "/Applications/Firefox.app/Contents/MacOS/firefox-bin" "-marionette" "-foreground" "-no-remote" "-profile" "/var/folders/pz/6z9pght940zdtg2xz9799w3c0000gn/T/rust_mozprofile4LT1NT"
+1574898867282	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1574898867282	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1574898867282	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1574898867282	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1574898869283	Marionette	INFO	Listening on port 60966
+1574898869300	Marionette	WARN	TLS certificate errors will be ignored for this session
+1574899503003	mozrunner::runner	INFO	Running command: "/Applications/Firefox.app/Contents/MacOS/firefox-bin" "-marionette" "-foreground" "-no-remote" "-profile" "/var/folders/pz/6z9pght940zdtg2xz9799w3c0000gn/T/rust_mozprofilePXIdCT"
+1574899503631	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1574899503631	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1574899503631	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1574899503631	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1574899505512	Marionette	INFO	Listening on port 61143
+1574899505610	Marionette	WARN	TLS certificate errors will be ignored for this session
+[Parent 1975, Gecko_IOThread] WARNING: pipe error: Broken pipe: file /builds/worker/workspace/build/src/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 728
