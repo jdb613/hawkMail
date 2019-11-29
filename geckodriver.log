@@ -360,3 +360,5 @@ JavaScript error: file:///Users/jdb/Documents/Jeff/Apps/Finances/hawkMail/templa
 1574899505512	Marionette	INFO	Listening on port 61143
 1574899505610	Marionette	WARN	TLS certificate errors will be ignored for this session
 [Parent 1975, Gecko_IOThread] WARNING: pipe error: Broken pipe: file /builds/worker/workspace/build/src/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 728
+1574912960916	Marionette	INFO	Stopped listening on port 61143
+1574912986521	Marionette	INFO	Stopped listening on port 60966

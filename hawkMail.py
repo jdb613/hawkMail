@@ -46,6 +46,7 @@ chart_studio.tools.set_credentials_file(username=os.getenv('PLOTLY_USERNAME'), a
 clear_file = helpers.clear_data_file()
 print(clear_file)
 
+
 #Data from Plaid
 master_data = helpers.getData(hawk_mode, exclusions)
 data = dict(
@@ -58,6 +59,7 @@ data = dict(
     capone_total = master_data['cap1_total'],
     balance_great_lakes = master_data['lakes_balance'],
     greatlakes_total = master_data['lakes_total'],
+    spending_progress = helpers.progress(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode),
     chart_pack = {}
 )
 
@@ -68,9 +70,7 @@ CS_link = helpers.cumulativeSum(master_data['all_trnsx'], start_of_month, exclus
 # Update Monthly Spending Chart
 both_frames, MS_link = helpers.monthlySpending(master_data['all_trnsx'], exclusions, hawk_mode, 'Yes')
 
-#Update 3 Month Average Comparison Number
-prog_pct = helpers.progress(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
-print(prog_pct)
+
 #Update this Month's Category Chart
 CMC_link = helpers.curMonthCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 

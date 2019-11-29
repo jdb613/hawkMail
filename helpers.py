@@ -24,7 +24,7 @@ locale.setlocale( locale.LC_ALL, '' )
 today_str = str(date.today())
 hawk_mode = str(os.getenv('HAWK_MODE'))
 
-
+############### Utilities ###############
 def plaidClient():
     client = plaid.Client(os.getenv('PLAID_CLIENT_ID'),
                           os.getenv('PLAID_SECRET'),
@@ -87,58 +87,6 @@ def monthStart():
     return(month_start)
 
 
-
-def getTransactions(client, token, start_date, end_date):
-    try:
-        account_ids = [account['account_id'] for account in client.Accounts.get(token)['accounts']]
-        print(" {} Account ID's".format(idToken(token)))
-        print(len(account_ids))
-
-        response = client.Transactions.get(token, start_date, end_date, account_ids=account_ids)
-        rez = logResponse(response)
-        print(rez)
-        balance = getBalance(response)
-        num_available_transactions= response['total_transactions']
-        print("{} Transactions Recieved from Plaid".format(num_available_transactions))
-        num_pages = math.ceil(num_available_transactions / 500)
-        transactions = []
-
-        for page_num in range(num_pages):
-            print("{}% Complete".format(page_num/num_pages * 100))
-            transactions += [transaction for transaction in client.Transactions.get(token, start_date, end_date, account_ids=account_ids, offset=page_num * 500, count=500)['transactions']]
-
-
-        return transactions, balance
-
-    except plaid.errors.PlaidError as e:
-        print(json.dumps({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } }))
-        print('full error: ', e)
-        transactions = {'result': e.code}
-        balance = {'result': e.code}
-        return transactions, balance
-
-
-def cap1_lakes_get(client, token, start_date, end_date):
-    account_ids = [account['account_id'] for account in client.Accounts.get(token)['accounts']]
-    print(" {} Account ID's".format(idToken(token)))
-    print(len(account_ids))
-    response = client.Transactions.get(token, start_date, end_date, account_ids=account_ids)
-    return response
-
-def lakesData(data):
-    act_list = data['accounts']
-    balance_sum = 0
-    for a in act_list:
-        balance_sum += int(a['balances']['current'])
-
-    pmt_list = data['transactions']
-    pmt_totals = 0
-    for p in pmt_list:
-        pmt_totals += int(p['amount'])
-
-    return currencyConvert(balance_sum), currencyConvert(pmt_totals)
-
-
 def json2pandaClean(data, exclusions):
     flat_list = []
     with open('templates/data.txt','a') as file:
@@ -162,14 +110,14 @@ def json2pandaClean(data, exclusions):
             print('cant flatten: ', type(d))
             print(d)
             df = pd.DataFrame()
-
-
     return df
+
 
 def pandaSum(frame):
     fsum = frame['amount'].sum()
     sum_str = f'{fsum:.2f}'
     return '$' + sum_str
+
 
 def drop_columns(df):
     df = df.drop(columns=['location_address', 'location_city', 'location_lat',
@@ -179,6 +127,7 @@ def drop_columns(df):
        'payment_meta_ppd_id', 'payment_meta_reason',
        'payment_meta_reference_number','pending_transaction_id', 'transaction_id', 'pending'])
     return df
+
 
 def tidy_df(df, hawk_mode):
     if hawk_mode == 'sandbox':
@@ -195,6 +144,7 @@ def tidy_df(df, hawk_mode):
     #df.index = df.index.strftime('%m/%d/%y')
     return tdfst
 
+
 def paymentFinder(json):
     df = pd.DataFrame(json)
     df["date"] = pd.to_datetime(df['date'])
@@ -204,8 +154,10 @@ def paymentFinder(json):
     monthly_sum = df.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
     return monthly_sum
 
+
 def currencyConvert(x):
     return '${:,.2f}'.format(x)
+
 
 def tableTidy(df, hawk_mode):
     df = drop_columns(df)
@@ -219,6 +171,67 @@ def tableTidy(df, hawk_mode):
         df['amount'] = df['amount'].apply(currencyConvert)
     df.columns = map(str.capitalize, df.columns)
     return df
+
+
+def chartLINK(filename):
+    try:
+        url = py.plot(fig, filename=c)
+        return url.resource
+    except:
+        return 'Link Not Found'
+
+def lakesData(data):
+    act_list = data['accounts']
+    balance_sum = 0
+    for a in act_list:
+        balance_sum += int(a['balances']['current'])
+
+    pmt_list = data['transactions']
+    pmt_totals = 0
+    for p in pmt_list:
+        pmt_totals += int(p['amount'])
+
+    return currencyConvert(balance_sum), currencyConvert(pmt_totals)
+
+
+############### API Interactions ###############
+def getTransactions(client, token, start_date, end_date):
+    try:
+        account_ids = [account['account_id'] for account in client.Accounts.get(token)['accounts']]
+        print(" {} Account ID's".format(idToken(token)))
+        print(len(account_ids))
+
+        response = client.Transactions.get(token, start_date, end_date, account_ids=account_ids)
+        rez = logResponse(response)
+        print(rez)
+        balance = getBalance(response)
+        num_available_transactions= response['total_transactions']
+        print("{} Transactions Recieved from Plaid".format(num_available_transactions))
+        num_pages = math.ceil(num_available_transactions / 500)
+        transactions = []
+
+        for page_num in range(num_pages):
+            print("{}% Complete".format(page_num/num_pages * 100))
+            transactions += [transaction for transaction in client.Transactions.get(token, start_date, end_date, account_ids=account_ids, offset=page_num * 500, count=500)['transactions']]
+
+        return transactions, balance
+
+    except plaid.errors.PlaidError as e:
+        print(json.dumps({'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type } }))
+        print('full error: ', e)
+        transactions = {'result': e.code}
+        balance = {'result': e.code}
+
+        return transactions, balance
+
+
+def cap1_lakes_get(client, token, start_date, end_date):
+    account_ids = [account['account_id'] for account in client.Accounts.get(token)['accounts']]
+    print(" {} Account ID's".format(idToken(token)))
+    print(len(account_ids))
+    response = client.Transactions.get(token, start_date, end_date, account_ids=account_ids)
+    return response
+
 
 def getData(environment, exclusions):
     master_data = {}
@@ -267,6 +280,29 @@ def getData(environment, exclusions):
         print('Exception!!', master_data['all_trnsx'])
     return master_data
 
+############## Data Vizualization ##############
+def progress(json, date, exclusions, hawk_mode):
+    lcl_df = json2pandaClean(json, exclusions)
+    lcl_df = lcl_df.loc[lcl_df.pending == False]
+    monthly_spending_df, URL = monthlySpending(json, exclusions, hawk_mode, 'No')
+    print('Monthly Spending')
+    print(monthly_spending_df)
+    three_mnth_trailing = monthly_spending_df[-3:]
+    print('3 Month Trailing')
+    print(three_mnth_trailing)
+    threeMave = three_mnth_trailing.mean()
+    this_month_df = lcl_df.loc[date:]
+    dec = this_month_df['amount'].sum()/threeMave * 100
+    dec_rez = dec['amount']
+    rpct = f'{(1 - (dec_rez/100)):.2f}' + '%'
+    pct = f'{dec_rez:.2f}' + '%'
+    progHTML = 'td bgcolor="#f83f83" style="width:'
+    progHTML += str(pct)
+    progHTML += '%; background-color:#f83f83; float:left; height:15px;"></td><td bgcolor="#cccccc" style="width:'
+    progHTML += str(rpct)
+    progHTML += '%; background-color:#cccccc; float:left; height:15px;"></td>'
+    return progHTML
+
 def cumulativeSum(data, date, exclusions, hawk_mode):
     df = json2pandaClean(data, exclusions)
     df = df.loc[df.pending == False]
@@ -295,8 +331,8 @@ def cumulativeSum(data, date, exclusions, hawk_mode):
                 anchor="x",
                 overlaying="y",
                 side="right"
-            ))
-    fig.update_layout(template="ggplot2")
+            ),
+            template="ggplot2")
     try:
         if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
             URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
@@ -339,12 +375,9 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
     Smonthly_sum = schwab_frame.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
     Cmonthly_sum = chase_frame.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
     both_frames = both_frames.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
-    print('Resample Monthly Spending Both Frames Size: ', both_frames.describe())
+
     cc_payments = paymentFinder(json)
-    print('cc_payments type : ', type(cc_payments))
-    print('cc_payments 0 : ', cc_payments.iloc[0].amount)
-    #Cmonthly_sum = Cmonthly_sum.drop(columns=['category'])
-    #Smonthly_sum = Smonthly_sum.drop(columns=['category'])
+
     if flag == 'Yes':
         print('Updating Plotly Monthly Chart')
         fig = go.Figure(
@@ -360,7 +393,7 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
             title=go.layout.Title(text="Monthly Spending")
         ))
         fig.update_xaxes(nticks=len(Cmonthly_sum), tickangle=45)
-        fig.update_layout(barmode='stack')
+        fig.update_layout(barmode='stack', template="ggplot2")
 
         for i in range(len(cc_payments.amount.to_list())):
             start = cc_payments.index[i]
@@ -374,7 +407,7 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
                     y1=cc_payments.iloc[i].amount
             ))
         fig.update_shapes(dict(xref='x', yref='y'))
-        fig.update_layout(template="ggplot2")
+
         if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
             URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
         else:
@@ -383,21 +416,6 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
         URL = 'Update Not Requested'
     return both_frames, URL
 
-def progress(json, date, exclusions, hawk_mode):
-    lcl_df = json2pandaClean(json, exclusions)
-    lcl_df = lcl_df.loc[lcl_df.pending == False]
-    monthly_spending_df, URL = monthlySpending(json, exclusions, hawk_mode, 'No')
-    print('Monthly Spending')
-    print(monthly_spending_df)
-    three_mnth_trailing = monthly_spending_df[-3:]
-    print('3 Month Trailing')
-    print(three_mnth_trailing)
-    threeMave = three_mnth_trailing.mean()
-    this_month_df = lcl_df.loc[date:]
-    dec = this_month_df['amount'].sum()/threeMave * 100
-    dec_rez = dec['amount']
-    pct = f'{dec_rez:.2f}' + '%'
-    return pct
 
 def curMonthCategories(data, date, exclusions, hawk_mode):
     df1 = json2pandaClean(data, exclusions)
@@ -414,7 +432,6 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
                 y=df_fram.index.tolist(),
                 x=df_fram.amount.values.tolist(),
                 marker=dict(
-                color='#4A707A',
                 line=dict(
                     width=1)
                     ),
@@ -430,8 +447,7 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
                                 text=locale.currency(xd),
                                 font=dict(family='Arial', size=12),
                                 showarrow=False))
-    fig.update_layout(annotations=annotations)
-    fig.update_layout(template="ggplot2")
+    fig.update_layout(annotations=annotations, template="ggplot2")
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
@@ -545,8 +561,7 @@ def categoryHistory(data, exclusions, hawk_mode):
                                 y=yd, x=xd + 100,
                                 text=locale.currency(xd),
                                 font=dict(family='Arial', size=12)))
-    fig.update_layout(annotations=annotations)
-    fig.update_layout(template="ggplot2")
+    fig.update_layout(annotations=annotations, template="ggplot2")
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
@@ -605,49 +620,6 @@ def relativeCategories(data, date, exclusions, hawk_mode):
     return URL
 
 
-
-
-
-
-########## Plotly Charts ########
-
-def plotlyTopCategoryNameChart(frame, number):
-    fig = go.Figure(go.Bar(
-            x=frame.values.tolist(),
-            y=frame.index.tolist(),
-            orientation='h'))
-    fig.update_layout(
-        title=category_df.index[i])
-    filename = 'topCategoryNameBarChart'
-    py.plot(fig, filename=filename, auto_open=False)
-    print("Plotly Top Category Name Chart{}% Updated".format(number))
-    return filename
-
-def plotlyMonthlyChart(frame):
-    print('Updating Plotly Monthly Chart')
-    fig = go.Figure()
-    fig.add_trace(
-        go.Bar(
-            x = frame.index,
-            y = frame.amount
-        ))
-    fig.update_layout(title_text="Monthly Total Spending")
-    py.plot(fig, filename="HistoricalSpending", auto_open=False)
-    return 'Plotly Monthly Chart Updated'
-
-def plotlyCategoryHistory_Update(frame):
-    print('Updating Plotly Category History Chart')
-    fig = go.Figure()
-    fig.add_trace(
-        go.Bar(
-            y = frame.index,
-            x = frame.amount,
-            orientation='h'
-        ))
-    fig.update_layout(title_text="Historical Spending by Category")
-    py.plot(fig, filename="ALLMonthCategory.html", auto_open=False)
-    return 'Plotly Category History Chart Updated'
-
 def transactionTables(data, date, exclusions, hawk_mode):
     print('Date: ', datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y'))
     df = json2pandaClean(data, exclusions)
@@ -700,14 +672,7 @@ def transactionTables(data, date, exclusions, hawk_mode):
     return URL
 
 
-def chartLINK(filename):
-    try:
-        url = py.plot(fig, filename=c)
-        return url.resource
-    except:
-        return 'Link Not Found'
-
-
+################ HTML Generation ################
 def tableChartHTML(data, date, exclusions, hawk_mode, chart_files):
     chartsHTML = ''
     for c in chart_files:
@@ -717,20 +682,6 @@ def tableChartHTML(data, date, exclusions, hawk_mode, chart_files):
 
     return chartsHTML
 
-def blankHTMLchart(link):
-    template = (''
-    '<a href="{link}" target="_blank">' # Open the interactive graph when you click on the image
-        '<img src="{link}.png">'        # Use the ".png" magic url so that the latest, most-up-to-date image is included
-    '</a>'
-    '{link}'                              # Optional caption to include below the graph
-    '<br>'                                   # Line break
-    '<a href="{link}" style="color: rgb(190,190,190); text-decoration: none; font-weight: 200;" target="_blank">'
-        'Click to comment and see the interactive graph'  # Direct readers to Plotly for commenting, interactive graph
-    '</a>'
-    '<br>'
-    '<hr>'                                   # horizontal line
-    '')
-    return template
 
 def htmlGraph(graph):
     print('Graph Data for HTML: ', graph)
@@ -754,24 +705,6 @@ def htmlGraph(graph):
     email_body += _
     return email_body
 
-
-def generate_HTML(balance_chase, balance_schwab, charts_tables, chase_total, schwab_total, cap1_total, balance_great_lakes, balance_cap_one, topCatHTML):
-    # Create the jinja2 environment.
-    # Notice the use of trim_blocks, which greatly helps control whitespace.
-    j2_env = Environment(loader=FileSystemLoader('./templates'),
-                         trim_blocks=True)
-    template_ready = j2_env.get_template('newhawk.html').render(
-        Date=today_str,
-        Chase_Balance=balance_chase,
-        Schwab_Balance=balance_schwab,
-        charts_and_tables=charts_tables,
-        Chase_Spent=chase_total,
-        Schwab_Spent=schwab_total,
-        Capital1_Spend=cap1_total,
-        Capital_One_Balance=balance_cap_one,
-        Great_Lakes_Balance=balance_great_lakes
-    )
-    return template_ready
 
 def jinjaTEST(data, hawk_mode):
     j2_env = Environment(loader=FileSystemLoader('./templates'),
@@ -797,3 +730,81 @@ def emailPreview(mail, hawk_mode):
         prev.write(mail)
         prev.close()
     return 'Preview File Updated'
+
+
+
+
+
+
+
+########## Plotly Charts ########
+
+# def plotlyTopCategoryNameChart(frame, number):
+#     fig = go.Figure(go.Bar(
+#             x=frame.values.tolist(),
+#             y=frame.index.tolist(),
+#             orientation='h'))
+#     fig.update_layout(
+#         title=category_df.index[i])
+#     filename = 'topCategoryNameBarChart'
+#     py.plot(fig, filename=filename, auto_open=False)
+#     print("Plotly Top Category Name Chart{}% Updated".format(number))
+#     return filename
+
+# def plotlyMonthlyChart(frame):
+#     print('Updating Plotly Monthly Chart')
+#     fig = go.Figure()
+#     fig.add_trace(
+#         go.Bar(
+#             x = frame.index,
+#             y = frame.amount
+#         ))
+#     fig.update_layout(title_text="Monthly Total Spending")
+#     py.plot(fig, filename="HistoricalSpending", auto_open=False)
+#     return 'Plotly Monthly Chart Updated'
+
+# def plotlyCategoryHistory_Update(frame):
+#     print('Updating Plotly Category History Chart')
+#     fig = go.Figure()
+#     fig.add_trace(
+#         go.Bar(
+#             y = frame.index,
+#             x = frame.amount,
+#             orientation='h'
+#         ))
+#     fig.update_layout(title_text="Historical Spending by Category")
+#     py.plot(fig, filename="ALLMonthCategory.html", auto_open=False)
+#     return 'Plotly Category History Chart Updated'
+
+# def generate_HTML(balance_chase, balance_schwab, charts_tables, chase_total, schwab_total, cap1_total, balance_great_lakes, balance_cap_one, topCatHTML):
+#     # Create the jinja2 environment.
+#     # Notice the use of trim_blocks, which greatly helps control whitespace.
+#     j2_env = Environment(loader=FileSystemLoader('./templates'),
+#                          trim_blocks=True)
+#     template_ready = j2_env.get_template('newhawk.html').render(
+#         Date=today_str,
+#         Chase_Balance=balance_chase,
+#         Schwab_Balance=balance_schwab,
+#         charts_and_tables=charts_tables,
+#         Chase_Spent=chase_total,
+#         Schwab_Spent=schwab_total,
+#         Capital1_Spend=cap1_total,
+#         Capital_One_Balance=balance_cap_one,
+#         Great_Lakes_Balance=balance_great_lakes
+#     )
+#     return template_ready
+
+# def blankHTMLchart(link):
+#     template = (''
+#     '<a href="{link}" target="_blank">' # Open the interactive graph when you click on the image
+#         '<img src="{link}.png">'        # Use the ".png" magic url so that the latest, most-up-to-date image is included
+#     '</a>'
+#     '{link}'                              # Optional caption to include below the graph
+#     '<br>'                                   # Line break
+#     '<a href="{link}" style="color: rgb(190,190,190); text-decoration: none; font-weight: 200;" target="_blank">'
+#         'Click to comment and see the interactive graph'  # Direct readers to Plotly for commenting, interactive graph
+#     '</a>'
+#     '<br>'
+#     '<hr>'                                   # horizontal line
+#     '')
+#     return template
