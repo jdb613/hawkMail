@@ -82,8 +82,8 @@ def monthStart():
         month_start = str(todayDate.year) + '-' + str(todayDate.month - 1) + '-' + str(15)
     else:
         month_start = str(todayDate.year) + '-' + str(todayDate.month) + '-' + str(15)
-    print('Start of Month: ', month_start)
-    print('Start of Month Type: ', type(month_start))
+    print('Start Date of Current Billing Period: ', datetime.strptime(month_start, '%Y-%m-%d').strftime('%m/%d/%y'))
+
     return(month_start)
 
 
@@ -246,7 +246,7 @@ def getData(environment, exclusions):
         lakes_response = cap1_lakes_get(SANDBOXplaidClient(), tokens['Great_Lakes']['sandbox'], start_date, today_str)
 
     elif environment == 'testing' or environment == 'local_testing':
-        start_date = date.today() - timedelta(days=30)
+        start_date = date.today() - timedelta(days=90)
         trnsx_chase, master_data['balance_chase'] = getTransactions(plaidClient(), tokens['Chase']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
         trnsx_schwab, master_data['balance_schwab'] = getTransactions(plaidClient(), tokens['Schwab']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
         cap1_response = cap1_lakes_get(plaidClient(), tokens['Capital_One']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
@@ -291,14 +291,21 @@ def progress(json, date, exclusions, hawk_mode):
     print('3 Month Trailing')
     print(three_mnth_trailing)
     threeMave = three_mnth_trailing.mean()
+    print('T3M Spending: ', threeMave)
     this_month_df = lcl_df.loc[date:]
+    print('Total Spending this Month: ', this_month_df['amount'].sum())
     dec = this_month_df['amount'].sum()/threeMave * 100
-    dec_rez = dec['amount']
-    rpct = f'{(1 - (dec_rez/100)):.2f}' + '%'
-    pct = f'{dec_rez:.2f}' + '%'
-    progHTML = 'td bgcolor="#f83f83" style="width:'
+    dec_rez = int(round(dec['amount']))
+    # rpct = f'{(100 - dec_rez):.2f}' + '%'
+    # pct = f'{dec_rez:.2f}' + '%'
+
+    pct = dec_rez
+    rpct = 100 - dec_rez
+    progHTML = '<td bgcolor="#f83f83" style="width:'
     progHTML += str(pct)
-    progHTML += '%; background-color:#f83f83; float:left; height:15px;"></td><td bgcolor="#cccccc" style="width:'
+    progHTML += '%; background-color:#f83f83; float:left; height:15px;text-align: center;">'
+    progHTML += str(pct)
+    progHTML += '%</td><td bgcolor="#cccccc" style="width:'
     progHTML += str(rpct)
     progHTML += '%; background-color:#cccccc; float:left; height:15px;"></td>'
     return progHTML
@@ -327,7 +334,7 @@ def cumulativeSum(data, date, exclusions, hawk_mode):
                 title="Daily Spend"
             ),
             yaxis2=dict(
-                title="Cumulative Spending",
+                title="Cumulative",
                 anchor="x",
                 overlaying="y",
                 side="right"
@@ -352,7 +359,7 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
     sum_frame = sum_frame.loc[sum_frame.pending == False]
     sum_frame = drop_columns(sum_frame)
     sum_frame = tidy_df(sum_frame, hawk_mode)
-    print('Sum_frame: ', sum_frame)
+
     if hawk_mode == 'sandbox':
         client = SANDBOXplaidClient()
         chase_acts = [account['account_id'] for account in client.Accounts.get(tokens['Chase']['sandbox'])['accounts']]
@@ -686,6 +693,7 @@ def tableChartHTML(data, date, exclusions, hawk_mode, chart_files):
 def htmlGraph(graph):
     print('Graph Data for HTML: ', graph)
     template = (''
+        '<td align="center" bgcolor="#E5DFDF">'
         '<a href="{graph_url}" target="_blank">' # Open the interactive graph when you click on the image
             '<img src="{graph_url}.png">'        # Use the ".png" magic url so that the latest, most-up-to-date image is included
         '</a>'
@@ -695,7 +703,8 @@ def htmlGraph(graph):
             'Click to comment and see the interactive graph'  # Direct readers to Plotly for commenting, interactive graph
         '</a>'
         '<br>'
-        '<hr>'                                   # horizontal line
+        '<hr>'
+        '</td><td bgcolor="#E5DFDF" style="font-size: 0; line-height: 0;" width="10">&nbsp;</td>'                                   # horizontal line
         '')
 
     email_body = ''
@@ -709,26 +718,15 @@ def htmlGraph(graph):
 def jinjaTEST(data, hawk_mode):
     j2_env = Environment(loader=FileSystemLoader('./templates'),
                          trim_blocks=True)
-    if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
-        template_ready = j2_env.get_template('sandbox.html').render(
-        jinja_data=data
-    )
-    else:
-        template_ready = j2_env.get_template('newhawk.html').render(
+    template_ready = j2_env.get_template('newhawk.html').render(
             jinja_data=data
         )
-
     return template_ready
 
 def emailPreview(mail, hawk_mode):
-    if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
-        prev = open('templates/sandbox_preview.html','w')
-        prev.write(mail)
-        prev.close()
-    else:
-        prev = open('templates/email_preview.html','w')
-        prev.write(mail)
-        prev.close()
+    prev = open('templates/email_preview.html','w')
+    prev.write(mail)
+    prev.close()
     return 'Preview File Updated'
 
 

@@ -90,16 +90,20 @@ RC_link = helpers.relativeCategories(master_data['all_trnsx'], start_of_month, e
 TT_Link = helpers.transactionTables(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 
 
-data['chart_pack']['chartHTML'] = helpers.tableChartHTML(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode, chart_files)
-# pending = helpers.pendingTable(master_data['all_trnsx'], exclusions)
-# months = helpers.monthsTransactionTable(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
-# data['chart_pack']['tableHTML'] = pending + months
-data['chart_pack']['divs'] = [CS_link, MS_link, CMC_link, TC_link, CH_link, RC_link, TT_Link]
-mail_data = helpers.jinjaTEST(data, hawk_mode)
+if hawk_mode == 'production' or hawk_mode == 'testing':
+    data['chart_pack']['chartHTML'] = helpers.tableChartHTML(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode, chart_files)
+else:
+    data['chart_pack']['divs'] = [CS_link, MS_link, CMC_link, TC_link, CH_link, RC_link, TT_Link]
 
+mail_data = helpers.jinjaTEST(data, hawk_mode)
 helpers.emailPreview(mail_data, hawk_mode)
 
-if hawk_mode == 'production' or hawk_mode == 'testing':
+if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
+    binary = FirefoxBinary('/Applications/Firefox.app/Contents/MacOS/firefox-bin')
+    browser = webdriver.Firefox(firefox_binary=binary, executable_path='/Users/jdb/.pyenv/versions/3.8.0/envs/hawkMailENV/bin/geckodriver')
+    browser.get("file:///Users/jdb/Documents/Jeff/Apps/Finances/hawkMail/templates/email_preview.html")
+
+else:
     with open('templates/email_preview.html', 'r') as f:
         html_string = f.read()
         f.close()
@@ -120,9 +124,6 @@ if hawk_mode == 'production' or hawk_mode == 'testing':
         print('>>> SendGrid ERROR')
         print(str(e))
 
-else:
 
-    binary = FirefoxBinary('/Applications/Firefox.app/Contents/MacOS/firefox-bin')
-    browser = webdriver.Firefox(firefox_binary=binary, executable_path='/Users/jdb/.pyenv/versions/3.8.0/envs/hawkMailENV/bin/geckodriver')
-    browser.get("file:///Users/jdb/Documents/Jeff/Apps/Finances/hawkMail/templates/sandbox_preview.html")
+
 
