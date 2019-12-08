@@ -455,3 +455,6 @@ JavaScript error: file:///Users/jdb/Documents/Jeff/Apps/Finances/hawkMail/templa
 1575080715426	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
 1575080716940	Marionette	INFO	Listening on port 56784
 1575080716977	Marionette	WARN	TLS certificate errors will be ignored for this session
+1575086032328	Marionette	INFO	Stopped listening on port 56784
+1575086033372	Marionette	INFO	Stopped listening on port 55830
+1575086041440	Marionette	INFO	Stopped listening on port 56353
