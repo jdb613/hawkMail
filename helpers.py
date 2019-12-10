@@ -50,7 +50,7 @@ def plaidTokens():
     return tokens
 
 def getBalance(data):
-    return '$' + str(data['accounts'][0]['balances']['current'])
+    return currencyConvert(data['accounts'][0]['balances']['current'])
 
 def idToken(token):
     tokens = plaidTokens()
@@ -84,7 +84,7 @@ def monthStart():
         month_start = str(todayDate.year) + '-' + str(todayDate.month) + '-' + str(15)
     print('Start Date of Current Billing Period: ', datetime.strptime(month_start, '%Y-%m-%d').strftime('%m/%d/%y'))
 
-    return(month_start)
+    return month_start
 
 
 def json2pandaClean(data, exclusions):
@@ -114,9 +114,9 @@ def json2pandaClean(data, exclusions):
 
 
 def pandaSum(frame):
+    frame = frame.loc[frame.index >= monthStart()]
     fsum = frame['amount'].sum()
-    sum_str = f'{fsum:.2f}'
-    return '$' + sum_str
+    return currencyConvert(fsum)
 
 
 def drop_columns(df):
@@ -239,26 +239,29 @@ def getData(environment, exclusions):
     today_str = str(date.today())
 
     if environment == 'sandbox':
+        client = SANDBOXplaidClient()
         start_date = date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d')
-        trnsx_chase, master_data['balance_chase'] = getTransactions(SANDBOXplaidClient(), tokens['Chase']['sandbox'], start_date, today_str)
-        trnsx_schwab, master_data['balance_schwab'] = getTransactions(SANDBOXplaidClient(), tokens['Schwab']['sandbox'], start_date, today_str)
-        cap1_response = cap1_lakes_get(SANDBOXplaidClient(), tokens['Capital_One']['sandbox'], start_date, today_str)
-        lakes_response = cap1_lakes_get(SANDBOXplaidClient(), tokens['Great_Lakes']['sandbox'], start_date, today_str)
+        trnsx_chase, master_data['balance_chase'] = getTransactions(client, tokens['Chase']['sandbox'], start_date, today_str)
+        trnsx_schwab, master_data['balance_schwab'] = getTransactions(client, tokens['Schwab']['sandbox'], start_date, today_str)
+        cap1_response = cap1_lakes_get(client, tokens['Capital_One']['sandbox'], start_date, today_str)
+        lakes_response = cap1_lakes_get(client, tokens['Great_Lakes']['sandbox'], start_date, today_str)
 
     elif environment == 'testing' or environment == 'local_testing':
+        client = plaidClient()
         start_date = date.today() - timedelta(days=90)
-        trnsx_chase, master_data['balance_chase'] = getTransactions(plaidClient(), tokens['Chase']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
-        trnsx_schwab, master_data['balance_schwab'] = getTransactions(plaidClient(), tokens['Schwab']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
-        cap1_response = cap1_lakes_get(plaidClient(), tokens['Capital_One']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
-        lakes_response = cap1_lakes_get(plaidClient(), tokens['Great_Lakes']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
+        trnsx_chase, master_data['balance_chase'] = getTransactions(client, tokens['Chase']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
+        trnsx_schwab, master_data['balance_schwab'] = getTransactions(client, tokens['Schwab']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
+        cap1_response = cap1_lakes_get(client, tokens['Capital_One']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
+        lakes_response = cap1_lakes_get(client, tokens['Great_Lakes']['access_token'], start_date.strftime('%Y-%m-%d'), today_str)
 
 
     elif environment == 'production':
+        client = plaidClient()
         start_date = date.today().replace(year = date.today().year - 2).strftime('%Y-%m-%d')
-        trnsx_chase, master_data['balance_chase'] = getTransactions(plaidClient(), tokens['Chase']['access_token'], start_date, today_str)
-        trnsx_schwab, master_data['balance_schwab'] = getTransactions(plaidClient(), tokens['Schwab']['access_token'], start_date, today_str)
-        cap1_response = cap1_lakes_get(plaidClient(), tokens['Capital_One']['access_token'], start_date, today_str)
-        lakes_response = cap1_lakes_get(plaidClient(), tokens['Great_Lakes']['access_token'], start_date, today_str)
+        trnsx_chase, master_data['balance_chase'] = getTransactions(client, tokens['Chase']['access_token'], start_date, today_str)
+        trnsx_schwab, master_data['balance_schwab'] = getTransactions(client, tokens['Schwab']['access_token'], start_date, today_str)
+        cap1_response = cap1_lakes_get(client, tokens['Capital_One']['access_token'], start_date, today_str)
+        lakes_response = cap1_lakes_get(client, tokens['Great_Lakes']['access_token'], start_date, today_str)
 
     try:
         master_data['chase_total'] = pandaSum(json2pandaClean(trnsx_chase, exclusions))
