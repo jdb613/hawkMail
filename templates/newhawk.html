@@ -9,7 +9,7 @@
 
 <body style="margin: 0; padding: 0;">
 
-  <table border="0" id="mainContainer" align="center" width=600 cellpadding="0" cellspacing="0" width="100%" bgcolor="#E5DFDF">
+  <table border="0" id="mainContainer" align="center" width=1000 cellpadding="0" cellspacing="0" width="100%" bgcolor="#E5DFDF">
     <tr>
         <td style="padding: 10px 0 30px 0;">
           <table align="center" border="0" id="logoContainer" cellpadding="0" cellspacing="0" width="600" style="border: 1px solid #E5DFDF; border-collapse: collapse;">
@@ -22,7 +22,7 @@
           </tr>
           <tr>
             <td align="center" bgcolor="#E5DFDF" style="padding: 10px 0 10px 0; color: #153643; font-size: 28px; font-weight: bold; font-family: Arial, sans-serif;">
-              <img src="templates/logo.png" alt="Tomohawk" width="175" height="100" style="display: block;" />
+              <img src={{ jinja_data.logo | b64encode }} alt="Tomohawk" width="175" height="100" style="display: block;" />
             </td>
           </tr>
         </table>
@@ -36,7 +36,7 @@
 
 
             <td width="50">
-              <table border="0" cellpadding="0" cellspacing="0"         width="100%">
+              <table border="1" cellpadding="0" cellspacing="0"         width="100%">
                 <tr>
                 <td width="100%" height="50"></td>
                 </tr>
@@ -49,12 +49,12 @@
                 </table>
             </td>
 
-            <td bgcolor="#E5DFDF" style="font-size: 0; line-height: 0;" width="10">
+            <td style="font-size: 0; line-height: 0;" width="10">
             &nbsp;
           </td>
 
             <td width="115" valign="top">
-              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+              <table border="1" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td align="center">
                     <a href="https://logo-logos.com/chase-bank-logo-418.html">
@@ -77,12 +77,12 @@
           </table>
           </td>
 
-          <td bgcolor="#E5DFDF" style="font-size: 0; line-height: 0;" width="10">&nbsp;
+          <td style="font-size: 0; line-height: 0;" width="10">&nbsp;
           </td>
 
 
           <td width="115" valign="top">
-            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <table border="1" cellpadding="0" cellspacing="0" width="100%">
               <tr>
                 <td align="center">
                   <a href="https://www.logosurfer.com/wp-content/uploads/2018/03/charles-schwab-logo_0.png" target="_blank">
@@ -104,11 +104,11 @@
             </table>
           </td>
 
-          <td bgcolor="#E5DFDF" style="font-size: 0; line-height: 0;" width="10">
+          <td style="font-size: 0; line-height: 0;" width="10">
                   &nbsp;
                 </td>
           <td width="115" valign="top">
-            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <table border="1" cellpadding="0" cellspacing="0" width="100%">
               <tr>
                 <td align="center">
                   <a href="https://www.logosurfer.com/wp-content/uploads/2018/03/capital-one-logo_0.png" target="_blank">
@@ -135,11 +135,11 @@
             </table>
           </td>
 
-          <td bgcolor="#E5DFDF" style="font-size: 0; line-height: 0;" width="10">&nbsp;
+          <td style="font-size: 0; line-height: 0;" width="10">&nbsp;
           </td>
 
           <td width="115" valign="top">
-            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <table border="1" cellpadding="0" cellspacing="0" width="100%">
               <tr>
                 <td align="center">
                   <a href="https://www.logosurfer.com/wp-content/uploads/2018/03/capital-one-logo_0.png" target="_blank">
@@ -163,7 +163,7 @@
       </td>
     </tr>
     <tr>
-      <td align="center" bgcolor="#E5DFDF">
+      <td align="center" bgcolor="#E5DFDF" style="padding: 40px 10px 40px 10px;">
           <table style="border:0;" cellpadding="0" cellspacing="0" width="250">
             <tr>
               <td align="center" bgcolor="#E5DFDF">
@@ -178,7 +178,7 @@
       </td>
   </tr>
   <tr>
-    <td bgcolor="#E5DFDF" style="padding: 40px 10px 40px 10px;" width="600">
+    <td bgcolor="#E5DFDF" style="padding: 40px 10px 40px 10px;" width="1000">
         <table border="0" id="chartContainer" cellpadding="0" cellspacing="0" width="100%">
                 {% if jinja_data.chart_pack.chartHTML|length %}
 
@@ -188,7 +188,7 @@
                     {% for div in jinja_data.chart_pack.divs %}
                                 <tr>
                                     <td>{{ div }}</td>
-                                    <td bgcolor="#E5DFDF" style="font-size: 0; line-height: 0;" width="10">&nbsp;
+                                    <td bgcolor="#E5DFDF" style="font-size: 1; line-height: 1;" width="750">&nbsp;
                                         </td>
                                 </tr>
                     {% endfor %}

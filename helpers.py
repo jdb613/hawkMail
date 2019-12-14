@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import plotly as plotly
 import chart_studio
 from plotly.subplots import make_subplots
+import plotly.figure_factory as ff
 import plaid
 from plaid.errors import APIError, ItemError
 import requests
@@ -151,7 +152,7 @@ def paymentFinder(json):
     df = df.set_index('date')
     df = df.loc[df['category_id'] == '16001000']
     df = df.loc[df['pending'] == False]
-    monthly_sum = df.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
+    monthly_sum = df.resample('M', loffset=pd.Timedelta(-16, 'd')).sum()
     return monthly_sum
 
 
@@ -382,9 +383,9 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
         both_frames = sum_frame[sum_frame['account'].isin(all_names)]
         print('Monthly Spending Both Frames Size: ', both_frames.describe())
 
-    Smonthly_sum = schwab_frame.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
-    Cmonthly_sum = chase_frame.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
-    both_frames = both_frames.resample('M', loffset=pd.Timedelta(16, 'd')).sum()
+    Smonthly_sum = schwab_frame.resample('M', loffset=pd.Timedelta(-16, 'd')).sum()
+    Cmonthly_sum = chase_frame.resample('M', loffset=pd.Timedelta(-16, 'd')).sum()
+    both_frames = both_frames.resample('M', loffset=pd.Timedelta(-16, 'd')).sum()
 
     cc_payments = paymentFinder(json)
 
@@ -402,7 +403,7 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
         layout=go.Layout(
             title=go.layout.Title(text="Monthly Spending")
         ))
-        fig.update_xaxes(nticks=len(Cmonthly_sum), tickangle=45)
+        fig.update_xaxes(rangemode="normal", showgrid=True, ticks="outside", tickson="boundaries")
         fig.update_layout(barmode='stack', template="ggplot2")
 
         for i in range(len(cc_payments.amount.to_list())):
@@ -434,6 +435,8 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
     cat_df = cat_df.groupby('category_1')["amount"].sum()
     df_fram = cat_df.to_frame()
     df_fram = df_fram[-15:].sort_values(by='amount', ascending=True)
+    df_fram['amount'] = df_fram['amount'].apply(locale.currency)
+
     print('Updating Plotly Category Chart')
     fig = go.Figure(
         data = [
@@ -441,6 +444,8 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
                 name="Category Spend",
                 y=df_fram.index.tolist(),
                 x=df_fram.amount.values.tolist(),
+                text=df_fram.amount.values.tolist(),
+                textposition='auto',
                 marker=dict(
                 line=dict(
                     width=1)
@@ -450,14 +455,14 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
         layout=go.Layout(
             title=go.layout.Title(text="This Month's Spending by Category")
         ))
-    annotations = []
-    for yd, xd in zip(df_fram.index.tolist(), df_fram.amount.values.tolist()):
-        annotations.append(dict(xref='x1', yref='y1',
-                                y=yd, x=xd + 100,
-                                text=locale.currency(xd),
-                                font=dict(family='Arial', size=12),
-                                showarrow=False))
-    fig.update_layout(annotations=annotations, template="ggplot2")
+    # annotations = []
+    # for yd, xd in zip(df_fram.index.tolist(), df_fram.amount.values.tolist()):
+    #     annotations.append(dict(xref='x1', yref='y1',
+    #                             y=yd, x=xd + 100,
+    #                             text=locale.currency(xd),
+    #                             font=dict(family='Arial', size=12),
+    #                             showarrow=False))
+    # fig.update_layout(annotations=annotations)
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
@@ -497,6 +502,7 @@ def categorySubplots(data, date, exclusions, hawk_mode):
             text=category_df.index.tolist(),
             textposition='auto',
             orientation='h')
+
     fig.append_trace(category_summary_trace, 1, 1)
     fig.update_layout(template="ggplot2")
 
@@ -536,6 +542,7 @@ def categorySubplots(data, date, exclusions, hawk_mode):
         fig.append_trace(table_trace, row+1, 1)
 
         row += 2
+    fig['layout'].update(height=3000, width=1000)
     fig.update_yaxes(showticklabels=False)
     fig.update_layout(template="ggplot2")
     if hawk_mode == 'sandbox'  or hawk_mode == 'local_testing':
@@ -608,11 +615,17 @@ def relativeCategories(data, date, exclusions, hawk_mode):
 
     fig.update_layout(
         title='Relative Category Spending',
-        xaxis_tickfont_size=14,
+        xaxis=dict(
+            title='Category',
+            titlefont_size=16,
+            tickfont_size=14,
+            tickangle=45
+        ),
         yaxis=dict(
             title='Spent',
             titlefont_size=16,
             tickfont_size=14,
+            tickangle=45
         ),
         legend=dict(
             x=0,
@@ -623,6 +636,7 @@ def relativeCategories(data, date, exclusions, hawk_mode):
         bargroupgap=0.1 # gap between bars of the same location coordinate.
     )
     fig.update_layout(template="ggplot2")
+    fig.update_yaxes(automargin=True)
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
@@ -645,41 +659,16 @@ def transactionTables(data, date, exclusions, hawk_mode):
     print('Final Posted')
     print(df_posted_tidy)
 
-    titles = ['Posted', 'Pending']
-    fig = make_subplots(rows=2, cols=1, subplot_titles=titles, vertical_spacing=0.05,
-                   specs=[[{"type": "table"}],
-                          [{"type": "table"}]])
-    posted_trace = go.Table(
-        header=dict(
-            values=df_posted_tidy.columns.tolist(),
-            font=dict(size=15),
-            align="left"
-        ),
-        cells=dict(
-            values=[df_posted_tidy[k].tolist() for k in df_posted_tidy.columns],
-            align = "left")
-    )
-    pending_trace = go.Table(
-        header=dict(
-            values=df_pending_tidy.columns.tolist(),
-            font=dict(size=15),
-            align="left"
-        ),
-        cells=dict(
-            values=[df_pending_tidy[k].tolist() for k in df_pending_tidy.columns],
-            align = "left")
-    )
+    pltly_posted = ff.create_table(df_posted_tidy)
+    pltly_pending = ff.create_table(df_pending_tidy)
 
-    fig.append_trace(posted_trace, 1, 1)
-    fig.append_trace(pending_trace, 2, 1)
-
-    fig.update_layout(template="ggplot2")
-#     fig.update_yaxes(showticklabels=False)
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
-        URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
+        URL_post = plotly.offline.plot(pltly_posted, include_plotlyjs=True, output_type='div')
+        URL_pend = plotly.offline.plot(pltly_pending, include_plotlyjs=True, output_type='div')
     else:
-        URL = py.plot(fig, filename="TransactionTableSubplots", auto_open=False)
-    return URL
+        URL_post = py.plot(pltly_posted, filename="PostedTable", auto_open=False)
+        URL_pend = py.plot(pltly_pending, filename="PendingTable", auto_open=False)
+    return URL_post, URL_pend
 
 
 ################ HTML Generation ################

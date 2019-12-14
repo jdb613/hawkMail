@@ -4,8 +4,8 @@
         {
             "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
             "balances": {
-                "available": 4509.14,
-                "current": 4509.14,
+                "available": 7738.5,
+                "current": 7738.5,
                 "iso_currency_code": "USD",
                 "limit": null,
                 "unofficial_currency_code": null
@@ -20,7 +20,7 @@
             "account_id": "A4pLoKjamKuVZPJ0jjoKfdjmdg6yKoU6VPRO0",
             "balances": {
                 "available": null,
-                "current": 526.3,
+                "current": 657.4,
                 "iso_currency_code": "USD",
                 "limit": null,
                 "unofficial_currency_code": null
@@ -45,9 +45,345 @@
         "item_id": "mYaZQjzAgjtK8xbVLLm4u7Bgy31n0MsMPXJmN",
         "webhook": ""
     },
-    "request_id": "90XXKMypOd5m6Sn",
-    "total_transactions": 72,
+    "request_id": "UyndDNUKMPH06di",
+    "total_transactions": 76,
     "transactions": [
+        {
+            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
+            "account_owner": null,
+            "amount": -4300.34,
+            "category": [
+                "Transfer",
+                "Payroll"
+            ],
+            "category_id": "21009000",
+            "date": "2019-12-13",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": null,
+                "lat": null,
+                "lon": null,
+                "state": null,
+                "store_number": null,
+                "zip": null
+            },
+            "name": "Bloomberg LP PAYROLL 190101~ Tran: ACHDD",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "5P5oAJDREJs8KnD9MM1PuqNxQoKAn0HBo9Zvp",
+            "transaction_type": "special",
+            "unofficial_currency_code": null
+        },
+        {
+            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
+            "account_owner": null,
+            "amount": -100,
+            "category": [
+                "Transfer",
+                "Deposit"
+            ],
+            "category_id": "21007000",
+            "date": "2019-12-10",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": null,
+                "lat": null,
+                "lon": null,
+                "state": null,
+                "store_number": null,
+                "zip": null
+            },
+            "name": "Deposit Mobile Banking",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "YY9LaMN1rMta4REyjjgzh6MzXD3kBmtQMdP4D",
+            "transaction_type": "special",
+            "unofficial_currency_code": null
+        },
+        {
+            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
+            "account_owner": null,
+            "amount": -100,
+            "category": [
+                "Transfer",
+                "Deposit"
+            ],
+            "category_id": "21007000",
+            "date": "2019-12-10",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": null,
+                "lat": null,
+                "lon": null,
+                "state": null,
+                "store_number": null,
+                "zip": null
+            },
+            "name": "Deposit Mobile Banking",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "vqmBXOzaoOuxNRe533DYTPky47Xzm7Fmd1jrN",
+            "transaction_type": "special",
+            "unofficial_currency_code": null
+        },
+        {
+            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
+            "account_owner": null,
+            "amount": 41.99,
+            "category": [
+                "Food and Drink",
+                "Restaurants"
+            ],
+            "category_id": "13005000",
+            "date": "2019-12-09",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": "New York",
+                "lat": null,
+                "lon": null,
+                "state": "NY",
+                "store_number": null,
+                "zip": null
+            },
+            "name": "LA GOURMET 111 EAST 58T",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "83RojJqa1JSx1A96EEeXf1O1r4djOnFyEJnBK",
+            "transaction_type": "place",
+            "unofficial_currency_code": null
+        },
+        {
+            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
+            "account_owner": null,
+            "amount": 50,
+            "category": [
+                "Transfer",
+                "Withdrawal",
+                "Check"
+            ],
+            "category_id": "21012001",
+            "date": "2019-12-06",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": null,
+                "lat": null,
+                "lon": null,
+                "state": null,
+                "store_number": null,
+                "zip": null
+            },
+            "name": "Check Paid #1042",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "x3JyQmzO9mS8LJQNKKXptLJPgPk80vFMbEZZx",
+            "transaction_type": "special",
+            "unofficial_currency_code": null
+        },
+        {
+            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
+            "account_owner": null,
+            "amount": 149.28,
+            "category": [
+                "Transfer",
+                "Third Party",
+                "Venmo"
+            ],
+            "category_id": "21010001",
+            "date": "2019-12-06",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": null,
+                "lat": null,
+                "lon": null,
+                "state": null,
+                "store_number": null,
+                "zip": null
+            },
+            "name": "Venmo",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": "Braintree",
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "bY1k7oN6Kotdrnvaqq7YTRkXRggj6XfqzEm7o",
+            "transaction_type": "special",
+            "unofficial_currency_code": null
+        },
+        {
+            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
+            "account_owner": null,
+            "amount": 1000,
+            "category": [
+                "Transfer",
+                "Third Party",
+                "Venmo"
+            ],
+            "category_id": "21010001",
+            "date": "2019-12-03",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": null,
+                "lat": null,
+                "lon": null,
+                "state": null,
+                "store_number": null,
+                "zip": null
+            },
+            "name": "Venmo",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": "Braintree",
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "QYwaKBN3QBtKrwY6XX53UA75v9Nbj8SExzkX6",
+            "transaction_type": "special",
+            "unofficial_currency_code": null
+        },
+        {
+            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
+            "account_owner": null,
+            "amount": 41.99,
+            "category": [
+                "Food and Drink",
+                "Restaurants"
+            ],
+            "category_id": "13005000",
+            "date": "2019-12-02",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": "New York",
+                "lat": null,
+                "lon": null,
+                "state": "NY",
+                "store_number": null,
+                "zip": null
+            },
+            "name": "LA GOURMET 111 EAST 58T",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "yy3KQRzO7RiZD0XEQQjdHyO0qPqAowUpkVxbX",
+            "transaction_type": "place",
+            "unofficial_currency_code": null
+        },
+        {
+            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
+            "account_owner": null,
+            "amount": -11.75,
+            "category": [
+                "Bank Fees",
+                "ATM"
+            ],
+            "category_id": "10002000",
+            "date": "2019-11-29",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": null,
+                "lat": null,
+                "lon": null,
+                "state": null,
+                "store_number": null,
+                "zip": null
+            },
+            "name": "ATM Fee Rebate",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "3DxoK06QO0SZVQ6d77BkSb97rKpOoqCoMz0BZ",
+            "transaction_type": "special",
+            "unofficial_currency_code": null
+        },
         {
             "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
             "account_owner": null,
@@ -82,6 +418,43 @@
             "pending": false,
             "pending_transaction_id": null,
             "transaction_id": "rLxDYXzg7Xsj4w1x55gDHJz50zggoztBojK1N",
+            "transaction_type": "special",
+            "unofficial_currency_code": null
+        },
+        {
+            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
+            "account_owner": null,
+            "amount": -0.53,
+            "category": [
+                "Interest",
+                "Interest Earned"
+            ],
+            "category_id": "15001000",
+            "date": "2019-11-29",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": null,
+                "lat": null,
+                "lon": null,
+                "state": null,
+                "store_number": null,
+                "zip": null
+            },
+            "name": "Interest Paid",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "BaQDb3r9N3IDpR34VVaesXArDnMZR5t3R8j5w",
             "transaction_type": "special",
             "unofficial_currency_code": null
         },
@@ -2501,230 +2874,6 @@
             "pending_transaction_id": null,
             "transaction_id": "q6jLNozXwoi0gADwzzLvFV1ed9LPJaCJp3rrp",
             "transaction_type": "special",
-            "unofficial_currency_code": null
-        },
-        {
-            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
-            "account_owner": null,
-            "amount": -4366.78,
-            "category": [
-                "Transfer",
-                "Payroll"
-            ],
-            "category_id": "21009000",
-            "date": "2019-09-13",
-            "iso_currency_code": "USD",
-            "location": {
-                "address": null,
-                "city": null,
-                "lat": null,
-                "lon": null,
-                "state": null,
-                "store_number": null,
-                "zip": null
-            },
-            "name": "Bloomberg LP PAYROLL 190101~ Tran: ACHDD",
-            "payment_meta": {
-                "by_order_of": null,
-                "payee": null,
-                "payer": null,
-                "payment_method": null,
-                "payment_processor": null,
-                "ppd_id": null,
-                "reason": null,
-                "reference_number": null
-            },
-            "pending": false,
-            "pending_transaction_id": null,
-            "transaction_id": "6qzovb1RBbuRQy1NppMyh6PO1eEAkafa83L9q",
-            "transaction_type": "special",
-            "unofficial_currency_code": null
-        },
-        {
-            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
-            "account_owner": null,
-            "amount": 53,
-            "category": [
-                "Food and Drink",
-                "Restaurants"
-            ],
-            "category_id": "13005000",
-            "date": "2019-09-09",
-            "iso_currency_code": "USD",
-            "location": {
-                "address": null,
-                "city": null,
-                "lat": null,
-                "lon": null,
-                "state": "NY",
-                "store_number": null,
-                "zip": null
-            },
-            "name": "CITIBAN0009491 1330 1ST",
-            "payment_meta": {
-                "by_order_of": null,
-                "payee": null,
-                "payer": null,
-                "payment_method": null,
-                "payment_processor": null,
-                "ppd_id": null,
-                "reason": null,
-                "reference_number": null
-            },
-            "pending": false,
-            "pending_transaction_id": null,
-            "transaction_id": "5P5oAJDREJs8KnD9MMmjhzy7EVqBbaUBJ6Dbb",
-            "transaction_type": "place",
-            "unofficial_currency_code": null
-        },
-        {
-            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
-            "account_owner": null,
-            "amount": 37.46,
-            "category": [
-                "Shops",
-                "Hardware Store"
-            ],
-            "category_id": "19030000",
-            "date": "2019-09-08",
-            "iso_currency_code": "USD",
-            "location": {
-                "address": "150 E 59th St",
-                "city": "New York",
-                "lat": 40.76192,
-                "lon": -73.967828,
-                "state": "NY",
-                "store_number": "6177",
-                "zip": "10022"
-            },
-            "name": "Home Depot",
-            "payment_meta": {
-                "by_order_of": null,
-                "payee": null,
-                "payer": null,
-                "payment_method": null,
-                "payment_processor": null,
-                "ppd_id": null,
-                "reason": null,
-                "reference_number": null
-            },
-            "pending": false,
-            "pending_transaction_id": null,
-            "transaction_id": "6qzovb1RBbuRQy1NppMBSJwbxv4xEvCarPnw7",
-            "transaction_type": "place",
-            "unofficial_currency_code": null
-        },
-        {
-            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
-            "account_owner": null,
-            "amount": 86.25,
-            "category": [
-                "Shops",
-                "Hardware Store"
-            ],
-            "category_id": "19030000",
-            "date": "2019-09-08",
-            "iso_currency_code": "USD",
-            "location": {
-                "address": "150 E 59th St",
-                "city": "New York",
-                "lat": 40.76192,
-                "lon": -73.967828,
-                "state": "NY",
-                "store_number": "6177",
-                "zip": "10022"
-            },
-            "name": "Home Depot",
-            "payment_meta": {
-                "by_order_of": null,
-                "payee": null,
-                "payer": null,
-                "payment_method": null,
-                "payment_processor": null,
-                "ppd_id": null,
-                "reason": null,
-                "reference_number": null
-            },
-            "pending": false,
-            "pending_transaction_id": null,
-            "transaction_id": "wBo3QqzAjqhe6jDm33Q7uAzgJyPJmyuLbV7K4",
-            "transaction_type": "place",
-            "unofficial_currency_code": null
-        },
-        {
-            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
-            "account_owner": null,
-            "amount": 50,
-            "category": [
-                "Transfer",
-                "Withdrawal",
-                "Check"
-            ],
-            "category_id": "21012001",
-            "date": "2019-09-03",
-            "iso_currency_code": "USD",
-            "location": {
-                "address": null,
-                "city": null,
-                "lat": null,
-                "lon": null,
-                "state": null,
-                "store_number": null,
-                "zip": null
-            },
-            "name": "Check Paid #1039",
-            "payment_meta": {
-                "by_order_of": null,
-                "payee": null,
-                "payer": null,
-                "payment_method": null,
-                "payment_processor": null,
-                "ppd_id": null,
-                "reason": null,
-                "reference_number": null
-            },
-            "pending": false,
-            "pending_transaction_id": null,
-            "transaction_id": "mYaZQjzAgjtK8xbVLLo5CVMxd41aqnHMwx7KX",
-            "transaction_type": "special",
-            "unofficial_currency_code": null
-        },
-        {
-            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
-            "account_owner": null,
-            "amount": 31.47,
-            "category": [
-                "Food and Drink",
-                "Restaurants",
-                "Fast Food"
-            ],
-            "category_id": "13005032",
-            "date": "2019-09-01",
-            "iso_currency_code": "USD",
-            "location": {
-                "address": "250  Woodbridge Center Dr",
-                "city": "Woodbridge",
-                "lat": 40.553983,
-                "lon": -74.300288,
-                "state": "NJ",
-                "store_number": "000000",
-                "zip": "07095"
-            },
-            "name": "Burger King",
-            "payment_meta": {
-                "by_order_of": null,
-                "payee": null,
-                "payer": null,
-                "payment_method": null,
-                "payment_processor": null,
-                "ppd_id": null,
-                "reason": null,
-                "reference_number": null
-            },
-            "pending": false,
-            "pending_transaction_id": null,
-            "transaction_id": "q6jLNozXwoi0gADwzzLjUEPyzr5zwLfJ397jB",
-            "transaction_type": "place",
             "unofficial_currency_code": null
         }
     ]

@@ -1,4 +1,5 @@
 import helpers
+import base64
 import plaid
 from plaid.errors import APIError, ItemError
 import requests
@@ -46,7 +47,7 @@ chart_studio.tools.set_credentials_file(username=os.getenv('PLOTLY_USERNAME'), a
 clear_file = helpers.clear_data_file()
 print(clear_file)
 
-
+encoded = base64.b64encode(open('templates/logo.png', "rb").read())
 #Data from Plaid
 master_data = helpers.getData(hawk_mode, exclusions)
 data = dict(
@@ -60,7 +61,8 @@ data = dict(
     balance_great_lakes = master_data['lakes_balance'],
     greatlakes_total = master_data['lakes_total'],
     spending_progress = helpers.progress(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode),
-    chart_pack = {}
+    chart_pack = {},
+    logo = 'data:image/png;base64,{}'.format(encoded.decode('utf8'))
 )
 
 
@@ -87,13 +89,13 @@ RC_link = helpers.relativeCategories(master_data['all_trnsx'], start_of_month, e
 
 #Table HTML
 # pending_HTML = helpers.pendingTable(master_data['all_trnsx'], exclusions)
-TT_Link = helpers.transactionTables(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+posted_tbl, pending_tbl = helpers.transactionTables(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 
 
-if hawk_mode == 'production' or hawk_mode == 'testing':
-    data['chart_pack']['chartHTML'] = helpers.tableChartHTML(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode, chart_files)
-else:
-    data['chart_pack']['divs'] = [CS_link, MS_link, CMC_link, TC_link, CH_link, RC_link, TT_Link]
+# if hawk_mode == 'production' or hawk_mode == 'testing':
+#     data['chart_pack']['chartHTML'] = helpers.tableChartHTML(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode, chart_files)
+
+data['chart_pack']['divs'] = [CS_link, MS_link, CMC_link, TC_link, CH_link, RC_link, posted_tbl, pending_tbl]
 
 mail_data = helpers.jinjaTEST(data, hawk_mode)
 helpers.emailPreview(mail_data, hawk_mode)
