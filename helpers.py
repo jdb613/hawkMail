@@ -649,26 +649,11 @@ def transactionTables(data, date, exclusions, hawk_mode):
     df = json2pandaClean(data, exclusions)
     df_pending = df.loc[df.pending == True]
     df_posted = df.loc[df.pending == False]
-    print('******** Pending ************')
     df_pending_tidy = tableTidy(df_pending, hawk_mode)
-    print('******** Posted ************')
     df_posted_tidy = tableTidy(df_posted, hawk_mode)
-    print('Pre Date Filter Posted')
-    print(df_posted_tidy)
     df_posted_tidy = df_posted_tidy.loc[df_posted_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
-    print('Final Posted')
-    print(df_posted_tidy)
 
-    pltly_posted = ff.create_table(df_posted_tidy)
-    pltly_pending = ff.create_table(df_pending_tidy)
-
-    if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
-        URL_post = plotly.offline.plot(pltly_posted, include_plotlyjs=True, output_type='div')
-        URL_pend = plotly.offline.plot(pltly_pending, include_plotlyjs=True, output_type='div')
-    else:
-        URL_post = py.plot(pltly_posted, filename="PostedTable", auto_open=False)
-        URL_pend = py.plot(pltly_pending, filename="PendingTable", auto_open=False)
-    return URL_post, URL_pend
+    return df_posted_tidy.to_html, df_pending_tidy.to_html
 
 
 ################ HTML Generation ################
