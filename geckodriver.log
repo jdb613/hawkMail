@@ -495,3 +495,10 @@ console.error: (new TypeError("container is undefined", "resource://devtools/cli
 1576289544094	Marionette	INFO	Stopped listening on port 64394
 1576289545591	Marionette	INFO	Stopped listening on port 50679
 1576289546756	Marionette	INFO	Stopped listening on port 53211
+1576458959269	mozrunner::runner	INFO	Running command: "/Applications/Firefox.app/Contents/MacOS/firefox-bin" "-marionette" "-foreground" "-no-remote" "-profile" "/var/folders/pz/6z9pght940zdtg2xz9799w3c0000gn/T/rust_mozprofileCWFpUd"
+1576458960262	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1576458960263	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1576458960263	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1576458960263	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1576458962311	Marionette	INFO	Listening on port 64507
+1576458962366	Marionette	WARN	TLS certificate errors will be ignored for this session
