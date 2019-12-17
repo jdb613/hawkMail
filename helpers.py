@@ -7,6 +7,7 @@ import plotly as plotly
 import chart_studio
 from plotly.subplots import make_subplots
 import plotly.figure_factory as ff
+import plotly.io as pio
 import plaid
 from plaid.errors import APIError, ItemError
 import requests
@@ -21,7 +22,7 @@ import numpy as np
 import re
 
 locale.setlocale( locale.LC_ALL, '' )
-
+pio.templates.default = "seaborn"
 today_str = str(date.today())
 hawk_mode = str(os.getenv('HAWK_MODE'))
 
@@ -289,7 +290,7 @@ def progress(json, date, exclusions, hawk_mode):
     lcl_df = json2pandaClean(json, exclusions)
     lcl_df = lcl_df.loc[lcl_df.pending == False]
     monthly_spending_df, URL = monthlySpending(json, exclusions, hawk_mode, 'No')
-    print('Monthly Spending')
+    print('*** Monthly Spending Progress ***')
     print(monthly_spending_df)
     three_mnth_trailing = monthly_spending_df[-3:]
     print('3 Month Trailing')
@@ -321,6 +322,8 @@ def cumulativeSum(data, date, exclusions, hawk_mode):
     month_trnsx1 = month_trnsx.resample('D')['amount'].sum().reset_index()
     month_trnsx1['CUMSUM'] = month_trnsx1['amount'].cumsum()
     month_trnsx1 = month_trnsx1.set_index('date')
+    print('*** Cumulative Sum Result ***')
+    print(month_trnsx1.head())
     print('Updating Plotly Cumulative Chart')
     fig = go.Figure(
         data=[
@@ -342,8 +345,7 @@ def cumulativeSum(data, date, exclusions, hawk_mode):
                 anchor="x",
                 overlaying="y",
                 side="right"
-            ),
-            template="ggplot2")
+            ))
     try:
         if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
             URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
@@ -370,23 +372,20 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
         schwab_acts = [account['account_id'] for account in client.Accounts.get(tokens['Schwab']['sandbox'])['accounts']]
         all_acts = chase_acts + schwab_acts
         chase_frame = sum_frame[sum_frame['account'].isin(chase_acts)]
-        print('chase_frame: ', chase_frame)
         schwab_frame = sum_frame[sum_frame['account'].isin(schwab_acts)]
         both_frames = sum_frame[sum_frame['account'].isin(all_acts)]
-        print('Monthly Spending Both Frames Size: ', both_frames.describe())
     else:
         client = plaidClient()
 
         chase_frame = sum_frame[sum_frame['account'].isin(chase_names)]
-        print('chase_frame: ', chase_frame)
         schwab_frame = sum_frame[sum_frame['account'].isin(schwab_names)]
         both_frames = sum_frame[sum_frame['account'].isin(all_names)]
-        print('Monthly Spending Both Frames Size: ', both_frames.describe())
 
     Smonthly_sum = schwab_frame.resample('M', loffset=pd.Timedelta(-16, 'd')).sum()
     Cmonthly_sum = chase_frame.resample('M', loffset=pd.Timedelta(-16, 'd')).sum()
     both_frames = both_frames.resample('M', loffset=pd.Timedelta(-16, 'd')).sum()
-
+    print('*** Monthly Spending Result ***')
+    print(both_frames.head())
     cc_payments = paymentFinder(json)
 
     if flag == 'Yes':
@@ -404,7 +403,7 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
             title=go.layout.Title(text="Monthly Spending")
         ))
         fig.update_xaxes(rangemode="normal", showgrid=True, ticks="outside", tickson="boundaries")
-        fig.update_layout(barmode='stack', template="ggplot2")
+        fig.update_layout(barmode='stack')
 
         for i in range(len(cc_payments.amount.to_list())):
             start = cc_payments.index[i]
@@ -436,7 +435,8 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
     df_fram = cat_df.to_frame()
     df_fram = df_fram[-15:].sort_values(by='amount', ascending=True)
     df_fram['amount'] = df_fram['amount'].apply(locale.currency)
-
+    print("*** This Month's Categories ***")
+    print(df_fram.head())
     print('Updating Plotly Category Chart')
     fig = go.Figure(
         data = [
@@ -476,7 +476,8 @@ def categorySubplots(data, date, exclusions, hawk_mode):
     df2 = tidy_df(df1, hawk_mode)
     df3 = df2.loc[monthStart():]
     category_df = df3.groupby('category_0')['amount'].sum().nlargest(5)
-
+    print('**** Top Categories This Month ***')
+    print(category_df.head())
     titles = ['Top Categories This Month']
     for i in range(len(category_df)):
         titles.append(category_df.index[i])
@@ -504,7 +505,6 @@ def categorySubplots(data, date, exclusions, hawk_mode):
             orientation='h')
 
     fig.append_trace(category_summary_trace, 1, 1)
-    fig.update_layout(template="ggplot2")
 
     row = 2
 
@@ -544,7 +544,6 @@ def categorySubplots(data, date, exclusions, hawk_mode):
         row += 2
     fig['layout'].update(height=3000, width=1000)
     fig.update_yaxes(showticklabels=False)
-    fig.update_layout(template="ggplot2")
     if hawk_mode == 'sandbox'  or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
@@ -559,7 +558,8 @@ def categoryHistory(data, exclusions, hawk_mode):
     cat_df = df1.groupby('category_1')["amount"].sum()
     df_fram = cat_df.to_frame()
     df_fram = df_fram[-15:].sort_values(by='amount', ascending=True)
-
+    print('*** Category History ***')
+    print(df_fram.head())
     print('Updating Plotly Category Chart')
     fig = go.Figure(
         data = [
@@ -578,7 +578,7 @@ def categoryHistory(data, exclusions, hawk_mode):
                                 y=yd, x=xd + 100,
                                 text=locale.currency(xd),
                                 font=dict(family='Arial', size=12)))
-    fig.update_layout(annotations=annotations, template="ggplot2")
+    fig.update_layout(annotations=annotations)
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
@@ -602,7 +602,8 @@ def relativeCategories(data, date, exclusions, hawk_mode):
     combined = combined.sort_values('This Month')
     z = np.abs(stats.zscore(combined))
     comb = combined[(z < 4).all(axis=1)].sort_values('This Month')
-
+    print('*** Relative Categories ***')
+    print(comb.head())
     fig = go.Figure()
     fig.add_trace(go.Bar(x=comb.index.tolist(),
                     y=comb['This Month'].tolist(),
@@ -635,7 +636,6 @@ def relativeCategories(data, date, exclusions, hawk_mode):
         bargap=0.15, # gap between bars of adjacent location coordinates.
         bargroupgap=0.1 # gap between bars of the same location coordinate.
     )
-    fig.update_layout(template="ggplot2")
     fig.update_yaxes(automargin=True)
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
@@ -652,19 +652,25 @@ def transactionTables(data, date, exclusions, hawk_mode):
     df_pending_tidy = tableTidy(df_pending, hawk_mode)
     df_posted_tidy = tableTidy(df_posted, hawk_mode)
     df_posted_tidy = df_posted_tidy.loc[df_posted_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
-
+    print('**** Pending ****')
+    print(df_pending.head())
+    print('*** Posted ***')
+    print(df_pending.head())
     return df_posted_tidy.to_html, df_pending_tidy.to_html
 
 
 ################ HTML Generation ################
-def tableChartHTML(data, date, exclusions, hawk_mode, chart_files):
-    chartsHTML = ''
-    for c in chart_files:
-        chart_link = chartLINK(c)
-        chartHTML = htmlGraph(chart_link)
-        chartsHTML += chartHTML
+def chartConvert(chart_link_lists):
+    return [htmlGraph(c) for c in chart_link_lists]
 
-    return chartsHTML
+# def tableChartHTML(data, date, exclusions, hawk_mode, chart_files):
+#     chartsHTML = ''
+#     for c in chart_files:
+#         chart_link = chartLINK(c)
+#         chartHTML = htmlGraph(chart_link)
+#         chartsHTML += chartHTML
+
+#     return chartsHTML
 
 
 def htmlGraph(graph):

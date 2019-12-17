@@ -502,3 +502,5 @@ console.error: (new TypeError("container is undefined", "resource://devtools/cli
 1576458960263	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
 1576458962311	Marionette	INFO	Listening on port 64507
 1576458962366	Marionette	WARN	TLS certificate errors will be ignored for this session
+objc[17057]: Class FIFinderSyncExtensionHost is implemented in both /System/Library/PrivateFrameworks/FinderKit.framework/Versions/A/FinderKit (0x7fff9590a3d8) and /System/Library/PrivateFrameworks/FileProvider.framework/OverrideBundles/FinderSyncCollaborationFileProviderOverride.bundle/Contents/MacOS/FinderSyncCollaborationFileProviderOverride (0x12e0d7f50). One of the two will be used. Which one is undefined.
+1576462419195	Marionette	INFO	Stopped listening on port 64507

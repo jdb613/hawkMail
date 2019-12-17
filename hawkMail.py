@@ -25,7 +25,7 @@ import chart_studio.plotly as py
 import plotly.graph_objects as go
 import plotly.io as pio
 pio.renderers.default = "firefox"
-
+pio.templates.default = "seaborn"
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -65,37 +65,40 @@ data = dict(
     logo = 'data:image/png;base64,{}'.format(encoded.decode('utf8'))
 )
 
-
+chart_links = []
 #Update Cumulative Chart
-CS_link = helpers.cumulativeSum(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+chart_links.append(helpers.cumulativeSum(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode))
 
 # Update Monthly Spending Chart
 both_frames, MS_link = helpers.monthlySpending(master_data['all_trnsx'], exclusions, hawk_mode, 'Yes')
-
+chart_links.append(MS_link)
 
 #Update this Month's Category Chart
-CMC_link = helpers.curMonthCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+chart_links.append(helpers.curMonthCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode))
 
 # HTML Tables for Most Spent Places in Top Categories
 # TC_link = helpers.topCategoryName(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 # print(TC_link)
-TC_link = helpers.categorySubplots(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+chart_links.append(helpers.categorySubplots(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode))
 
 #Update Category History Chart
 catHistory_frame, CH_link = helpers.categoryHistory(master_data['all_trnsx'], exclusions, hawk_mode)
-
+chart_links.append(CH_link)
 #Update Relative Category Chart
-RC_link = helpers.relativeCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+chart_links.append(helpers.relativeCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode))
 
 #Table HTML
 # pending_HTML = helpers.pendingTable(master_data['all_trnsx'], exclusions)
 posted_tbl, pending_tbl = helpers.transactionTables(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 
 
-# if hawk_mode == 'production' or hawk_mode == 'testing':
-#     data['chart_pack']['chartHTML'] = helpers.tableChartHTML(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode, chart_files)
-
-data['chart_pack']['divs'] = [CS_link, MS_link, CMC_link, TC_link, CH_link, RC_link, posted_tbl, pending_tbl]
+if hawk_mode == 'production' or hawk_mode == 'testing':
+    chart_data = helpers.chartConvert(chart_links)
+    chart_data.append(posted_tbl)
+    chart_data.append(pending_tbl)
+    data['chart_pack']['divs'] = chart_data
+else:
+    data['chart_pack']['divs'] = [CS_link, MS_link, CMC_link, TC_link, CH_link, RC_link, posted_tbl, pending_tbl]
 
 mail_data = helpers.jinjaTEST(data, hawk_mode)
 helpers.emailPreview(mail_data, hawk_mode)
