@@ -656,9 +656,16 @@ def transactionTables(data, date, exclusions, hawk_mode):
     print(df_pending.head())
     print('*** Posted ***')
     print(df_pending.head())
-    return df_posted_tidy.to_html, df_pending_tidy.to_html
+    return df_posted_tidy.to_html(), df_pending_tidy.to_html()
 
-
+def jumboTable(data, date, exclusions, hawk_mode):
+    df = json2pandaClean(data, exclusions)
+    df_posted = df.loc[df.pending == False]
+    df_posted_tidy = tableTidy(df_posted, hawk_mode)
+    df_posted_tidy = df_posted_tidy.loc[df_posted_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
+    df_posted_tidy['Amount'] = df_posted_tidy['Amount'].replace( '[\$,)]','', regex=True ).replace( '[(]','-',   regex=True ).astype(float)
+    df_posted_tidy = df_posted_tidy.loc[df_posted_tidy.Amount >= 100]
+    return df_posted_tidy.to_html()
 ################ HTML Generation ################
 def chartConvert(chart_link_lists):
     return [htmlGraph(c) for c in chart_link_lists]

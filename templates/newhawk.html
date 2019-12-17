@@ -188,11 +188,12 @@
 
                 {% else %}
                     {% for div in jinja_data.chart_pack.divs %}
+                                <tr><td></td></tr>
                                 <tr>
                                     <td>{{ div }}</td>
-                                    <td bgcolor="#E5DFDF" style="font-size: 1; line-height: 1;" width="750">&nbsp;
-                                        </td>
                                 </tr>
+                                <tr><td></td></tr>
+
                     {% endfor %}
                 {% endif %}
         </table>

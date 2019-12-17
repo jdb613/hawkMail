@@ -67,38 +67,39 @@ data = dict(
 
 chart_links = []
 #Update Cumulative Chart
-chart_links.append(helpers.cumulativeSum(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode))
-
+CS_link = helpers.cumulativeSum(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+chart_links.append(CS_link)
 # Update Monthly Spending Chart
 both_frames, MS_link = helpers.monthlySpending(master_data['all_trnsx'], exclusions, hawk_mode, 'Yes')
 chart_links.append(MS_link)
 
 #Update this Month's Category Chart
-chart_links.append(helpers.curMonthCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode))
-
+CMC_link = helpers.curMonthCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+chart_links.append(CMC_link)
 # HTML Tables for Most Spent Places in Top Categories
 # TC_link = helpers.topCategoryName(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 # print(TC_link)
-chart_links.append(helpers.categorySubplots(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode))
-
+TC_link = helpers.categorySubplots(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+chart_links.append(TC_link)
 #Update Category History Chart
 catHistory_frame, CH_link = helpers.categoryHistory(master_data['all_trnsx'], exclusions, hawk_mode)
 chart_links.append(CH_link)
 #Update Relative Category Chart
-chart_links.append(helpers.relativeCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode))
-
+RC_link = helpers.relativeCategories(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+chart_links.append(RC_link)
 #Table HTML
 # pending_HTML = helpers.pendingTable(master_data['all_trnsx'], exclusions)
 posted_tbl, pending_tbl = helpers.transactionTables(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
-
+jumbo_tbl = helpers.jumboTable(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 
 if hawk_mode == 'production' or hawk_mode == 'testing':
     chart_data = helpers.chartConvert(chart_links)
     chart_data.append(posted_tbl)
     chart_data.append(pending_tbl)
+    chart_data.append(jumbo_tbl)
     data['chart_pack']['divs'] = chart_data
 else:
-    data['chart_pack']['divs'] = [CS_link, MS_link, CMC_link, TC_link, CH_link, RC_link, posted_tbl, pending_tbl]
+    data['chart_pack']['divs'] = [CS_link, MS_link, CMC_link, TC_link, CH_link, RC_link, posted_tbl, pending_tbl, jumbo_tbl]
 
 mail_data = helpers.jinjaTEST(data, hawk_mode)
 helpers.emailPreview(mail_data, hawk_mode)
