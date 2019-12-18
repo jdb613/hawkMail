@@ -94,8 +94,11 @@ jumbo_tbl = helpers.jumboTable(master_data['all_trnsx'], start_of_month, exclusi
 
 if hawk_mode == 'production' or hawk_mode == 'testing':
     chart_data = helpers.chartConvert(chart_links)
+    chart_data.append('Posted')
     chart_data.append(posted_tbl)
+    chart_data.append('Pending')
     chart_data.append(pending_tbl)
+    chart_data.append('Large Transactions')
     chart_data.append(jumbo_tbl)
     data['chart_pack']['divs'] = chart_data
 else:

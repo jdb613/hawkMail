@@ -536,3 +536,5 @@ objc[24081]: Class FIFinderSyncExtensionHost is implemented in both /System/Libr
 1576550909214	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
 1576550910599	Marionette	INFO	Listening on port 57307
 1576550910623	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript warning: https://static.adsafeprotected.com/sca.17.4.95.js, line 32: Array.slice is deprecated; use Array.prototype.slice instead
+1576551271130	Marionette	INFO	Stopped listening on port 57307

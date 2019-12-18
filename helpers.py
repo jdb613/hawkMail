@@ -652,6 +652,7 @@ def transactionTables(data, date, exclusions, hawk_mode):
     df_pending_tidy = tableTidy(df_pending, hawk_mode)
     df_posted_tidy = tableTidy(df_posted, hawk_mode)
     df_posted_tidy = df_posted_tidy.loc[df_posted_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
+    df_pending_tidy = df_pending_tidy.loc[df_pending_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
     print('**** Pending ****')
     print(df_pending.head())
     print('*** Posted ***')
