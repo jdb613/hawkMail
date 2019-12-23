@@ -94,15 +94,15 @@ jumbo_tbl = helpers.jumboTable(master_data['all_trnsx'], start_of_month, exclusi
 
 if hawk_mode == 'production' or hawk_mode == 'testing':
     chart_data = helpers.chartConvert(chart_links)
-    chart_data.append('Posted')
+    chart_data.append('<h3> Posted </h3>')
     chart_data.append(posted_tbl)
-    chart_data.append('Pending')
+    chart_data.append('<h3> Pending </h3>')
     chart_data.append(pending_tbl)
-    chart_data.append('Large Transactions')
+    chart_data.append('<h3> Large Transactions </h3>')
     chart_data.append(jumbo_tbl)
     data['chart_pack']['divs'] = chart_data
 else:
-    data['chart_pack']['divs'] = [CS_link, MS_link, CMC_link, TC_link, CH_link, RC_link, posted_tbl, pending_tbl, jumbo_tbl]
+    data['chart_pack']['divs'] = [CS_link, CMC_link,  RC_link, MS_link, TC_link, CH_link, posted_tbl, pending_tbl, jumbo_tbl]
 
 mail_data = helpers.jinjaTEST(data, hawk_mode)
 helpers.emailPreview(mail_data, hawk_mode)

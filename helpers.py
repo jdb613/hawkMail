@@ -430,10 +430,12 @@ def monthlySpending(json, exclusions, hawk_mode, flag):
 def curMonthCategories(data, date, exclusions, hawk_mode):
     df1 = json2pandaClean(data, exclusions)
     df1 = df1.loc[df1.pending == False]
+    print('*** Current Month Category Before: ', len(df1))
     cat_df = df1.loc[df1.index >= date]
+    print('*** Current Month Category After: ', len(cat_df))
     cat_df = cat_df.groupby('category_1')["amount"].sum()
     df_fram = cat_df.to_frame()
-    df_fram = df_fram[-15:].sort_values(by='amount', ascending=True)
+    df_fram = df_fram[-15:].sort_values(by='amount', ascending=False)
     df_fram['amount'] = df_fram['amount'].apply(locale.currency)
     print("*** This Month's Categories ***")
     print(df_fram.head())
@@ -446,23 +448,12 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
                 x=df_fram.amount.values.tolist(),
                 text=df_fram.amount.values.tolist(),
                 textposition='auto',
-                marker=dict(
-                line=dict(
-                    width=1)
-                    ),
                 orientation='h')
             ],
         layout=go.Layout(
             title=go.layout.Title(text="This Month's Spending by Category")
         ))
-    # annotations = []
-    # for yd, xd in zip(df_fram.index.tolist(), df_fram.amount.values.tolist()):
-    #     annotations.append(dict(xref='x1', yref='y1',
-    #                             y=yd, x=xd + 100,
-    #                             text=locale.currency(xd),
-    #                             font=dict(family='Arial', size=12),
-    #                             showarrow=False))
-    # fig.update_layout(annotations=annotations)
+
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
@@ -570,7 +561,7 @@ def categoryHistory(data, exclusions, hawk_mode):
                 orientation='h')
             ],
         layout=go.Layout(
-            title=go.layout.Title(text="This Month's Spending by Category")
+            title=go.layout.Title(text="Historical Spending by Category")
         ))
     annotations = []
     for yd, xd in zip(df_fram.index.tolist(), df_fram.amount.values.tolist()):
@@ -582,7 +573,7 @@ def categoryHistory(data, exclusions, hawk_mode):
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
-        URL = py.plot(fig, filename="CurrentMonthCategory", auto_open=False)
+        URL = py.plot(fig, filename="CategoryHistory", auto_open=False)
 
     return df_fram.sort_values(by='category_1', ascending=True), URL
 
@@ -618,23 +609,16 @@ def relativeCategories(data, date, exclusions, hawk_mode):
         title='Relative Category Spending',
         xaxis=dict(
             title='Category',
-            titlefont_size=16,
-            tickfont_size=14,
             tickangle=45
         ),
         yaxis=dict(
-            title='Spent',
-            titlefont_size=16,
-            tickfont_size=14,
-            tickangle=45
+            title='Spent'
         ),
         legend=dict(
             x=0,
             y=1.0
         ),
-        barmode='group',
-        bargap=0.15, # gap between bars of adjacent location coordinates.
-        bargroupgap=0.1 # gap between bars of the same location coordinate.
+        barmode='group'
     )
     fig.update_yaxes(automargin=True)
     if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
@@ -651,13 +635,16 @@ def transactionTables(data, date, exclusions, hawk_mode):
     df_posted = df.loc[df.pending == False]
     df_pending_tidy = tableTidy(df_pending, hawk_mode)
     df_posted_tidy = tableTidy(df_posted, hawk_mode)
-    df_posted_tidy = df_posted_tidy.loc[df_posted_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
-    df_pending_tidy = df_pending_tidy.loc[df_pending_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
+    print('*** Posted Before: ', len(df_posted_tidy))
+    df_current_posted = df_posted_tidy.loc[df_posted_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
+    print('*** Posted After: ', len(df_current_posted))
+    df_current_pending = df_pending_tidy.loc[df_pending_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
     print('**** Pending ****')
-    print(df_pending.head())
+    print(df_current_pending.head())
     print('*** Posted ***')
-    print(df_pending.head())
-    return df_posted_tidy.to_html(), df_pending_tidy.to_html()
+    print(df_current_posted.head())
+
+    return df_current_posted.to_html(), df_current_pending.to_html()
 
 def jumboTable(data, date, exclusions, hawk_mode):
     df = json2pandaClean(data, exclusions)
@@ -670,16 +657,6 @@ def jumboTable(data, date, exclusions, hawk_mode):
 ################ HTML Generation ################
 def chartConvert(chart_link_lists):
     return [htmlGraph(c) for c in chart_link_lists]
-
-# def tableChartHTML(data, date, exclusions, hawk_mode, chart_files):
-#     chartsHTML = ''
-#     for c in chart_files:
-#         chart_link = chartLINK(c)
-#         chartHTML = htmlGraph(chart_link)
-#         chartsHTML += chartHTML
-
-#     return chartsHTML
-
 
 def htmlGraph(graph):
     print('Graph Data for HTML: ', graph)

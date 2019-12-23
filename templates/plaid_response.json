@@ -4,8 +4,8 @@
         {
             "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
             "balances": {
-                "available": 885.5,
-                "current": 885.5,
+                "available": 862.25,
+                "current": 862.25,
                 "iso_currency_code": "USD",
                 "limit": null,
                 "unofficial_currency_code": null
@@ -20,7 +20,7 @@
             "account_id": "A4pLoKjamKuVZPJ0jjoKfdjmdg6yKoU6VPRO0",
             "balances": {
                 "available": null,
-                "current": 594.7,
+                "current": 615.41,
                 "iso_currency_code": "USD",
                 "limit": null,
                 "unofficial_currency_code": null
@@ -45,9 +45,46 @@
         "item_id": "mYaZQjzAgjtK8xbVLLm4u7Bgy31n0MsMPXJmN",
         "webhook": ""
     },
-    "request_id": "O2aiIVkzBCwoiik",
-    "total_transactions": 76,
+    "request_id": "Bd4gKrtUweDik98",
+    "total_transactions": 75,
     "transactions": [
+        {
+            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
+            "account_owner": null,
+            "amount": 23.25,
+            "category": [
+                "Food and Drink",
+                "Restaurants"
+            ],
+            "category_id": "13005000",
+            "date": "2019-12-18",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": "939 3rd Ave",
+                "city": "New York",
+                "lat": null,
+                "lon": null,
+                "state": "NY",
+                "store_number": null,
+                "zip": null
+            },
+            "name": "AXD34252 939 3RD AVE",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "16Zo37dQz7iNomdzvv11TebkEgJm4aHm9zwZa",
+            "transaction_type": "place",
+            "unofficial_currency_code": null
+        },
         {
             "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
             "account_owner": null,
@@ -2797,80 +2834,6 @@
             "pending": false,
             "pending_transaction_id": null,
             "transaction_id": "E81q90xEJ0uMo9Opzzp5C8B7A0OE66fp3VxaB",
-            "transaction_type": "special",
-            "unofficial_currency_code": null
-        },
-        {
-            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
-            "account_owner": null,
-            "amount": 7150,
-            "category": [
-                "Payment",
-                "Credit Card"
-            ],
-            "category_id": "16001000",
-            "date": "2019-09-20",
-            "iso_currency_code": "USD",
-            "location": {
-                "address": null,
-                "city": null,
-                "lat": null,
-                "lon": null,
-                "state": null,
-                "store_number": null,
-                "zip": null
-            },
-            "name": "CHASE CREDIT CRD EPAY 190918~ Tran: ACHD",
-            "payment_meta": {
-                "by_order_of": null,
-                "payee": null,
-                "payer": null,
-                "payment_method": null,
-                "payment_processor": null,
-                "ppd_id": null,
-                "reason": null,
-                "reference_number": null
-            },
-            "pending": false,
-            "pending_transaction_id": null,
-            "transaction_id": "pw06nmzAdmfvRyZP99PqfmppYqJzJOtJgNEKJ",
-            "transaction_type": "special",
-            "unofficial_currency_code": null
-        },
-        {
-            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
-            "account_owner": null,
-            "amount": 250,
-            "category": [
-                "Transfer",
-                "Debit"
-            ],
-            "category_id": "21006000",
-            "date": "2019-09-19",
-            "iso_currency_code": "USD",
-            "location": {
-                "address": null,
-                "city": null,
-                "lat": null,
-                "lon": null,
-                "state": null,
-                "store_number": null,
-                "zip": null
-            },
-            "name": "Funds Transfer to Brokerage -7827",
-            "payment_meta": {
-                "by_order_of": null,
-                "payee": null,
-                "payer": null,
-                "payment_method": null,
-                "payment_processor": null,
-                "ppd_id": null,
-                "reason": null,
-                "reference_number": null
-            },
-            "pending": false,
-            "pending_transaction_id": null,
-            "transaction_id": "zKvkQRzOoRu51RApJJpahLqJOkPXa6IODRKZy",
             "transaction_type": "special",
             "unofficial_currency_code": null
         }
