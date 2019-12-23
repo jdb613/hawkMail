@@ -185,7 +185,7 @@
       </td>
   </tr>
   <tr>
-    <td bgcolor="#E5DFDF" style="padding: 40px 10px 40px 10px;" width="100%" align="center">
+    <td bgcolor="#E5DFDF" style="padding: 5px 5px 5px 5px;" width="100%" align="center">
         <table border="0" id="chartContainer" cellpadding="0" cellspacing="0" width="100%">
                     {% for div in jinja_data.chart_pack.divs %}
                                 <tr><td></td></tr>
@@ -195,7 +195,21 @@
                                 <tr>
                                   <td style="font-size: 0; line-height: 0;" width="20">&nbsp;</td>
                                 </tr>
-
+                    {% endfor %}
+        </table>
+    </td>
+</tr>
+<tr>
+  <td bgcolor="#E5DFDF" style="padding: 5px 5px 5px 5px;" width="100%" align="center">
+    <table border="0" id="chartContainer" cellpadding="0" cellspacing="0" width="100%">
+                  {% for table in jinja_data.tables %}
+                    <tr><td></td></tr>
+                    <tr>
+                        {{ table }}
+                    </tr>
+                    <tr>
+                      <td style="font-size: 0; line-height: 0;" width="20">&nbsp;</td>
+                    </tr>
                     {% endfor %}
         </table>
     </td>

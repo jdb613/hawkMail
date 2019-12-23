@@ -195,6 +195,13 @@ def lakesData(data):
 
     return currencyConvert(balance_sum), currencyConvert(pmt_totals)
 
+def tableStyles():
+    styles = [dict(selector="caption",
+            props=[("text-align", "center"),
+                    ("font-size", "200%"),
+                    ("color", 'black'),
+                    ('font-weight', 'bold')])]
+    return styles
 
 ############### API Interactions ###############
 def getTransactions(client, token, start_date, end_date):
@@ -335,7 +342,7 @@ def cumulativeSum(data, date, exclusions, hawk_mode):
         layout=go.Layout(
             title=go.layout.Title(text="Cumulative Spending")
         ))
-    fig.update_xaxes(nticks=len(month_trnsx1), tickangle=45)
+    # fig.update_xaxes(nticks=len(month_trnsx1), tickangle=45)
     fig.update_layout(
             yaxis=dict(
                 title="Daily Spend"
@@ -345,7 +352,13 @@ def cumulativeSum(data, date, exclusions, hawk_mode):
                 anchor="x",
                 overlaying="y",
                 side="right"
-            ))
+            ),
+            legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ))
     try:
         if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
             URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
@@ -446,7 +459,7 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
                 name="Category Spend",
                 y=df_fram.index.tolist(),
                 x=df_fram.amount.values.tolist(),
-                text=df_fram.amount.values.tolist(),
+                text= [str('<b>' + i + '</b>') for i in df_fram.amount.values.tolist()],
                 textposition='auto',
                 orientation='h')
             ],
@@ -533,8 +546,9 @@ def categorySubplots(data, date, exclusions, hawk_mode):
         fig.append_trace(table_trace, row+1, 1)
 
         row += 2
-    fig['layout'].update(height=3000, width=1000)
+    # fig['layout'].update(height=3000, width=1000)
     fig.update_yaxes(showticklabels=False)
+    fig.update_layout(autosize=False, height=5000, width=600, title_text="Category Analysis")
     if hawk_mode == 'sandbox'  or hawk_mode == 'local_testing':
         URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
     else:
@@ -609,14 +623,18 @@ def relativeCategories(data, date, exclusions, hawk_mode):
         title='Relative Category Spending',
         xaxis=dict(
             title='Category',
-            tickangle=45
+            tickangle=90,
+            tickfont=dict(
+            size=8)
         ),
         yaxis=dict(
             title='Spent'
         ),
         legend=dict(
             x=0,
-            y=1.0
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
         ),
         barmode='group'
     )
@@ -639,12 +657,19 @@ def transactionTables(data, date, exclusions, hawk_mode):
     df_current_posted = df_posted_tidy.loc[df_posted_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
     print('*** Posted After: ', len(df_current_posted))
     df_current_pending = df_pending_tidy.loc[df_pending_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
+    df_current_posted = df_current_posted.fillna('-')
+    df_current_pending = df_current_pending.fillna('-')
     print('**** Pending ****')
     print(df_current_pending.head())
     print('*** Posted ***')
     print(df_current_posted.head())
+    print('Min: ', df_current_posted.Date.min())
+    print('Max: ', df_current_posted.Date.max())
 
-    return df_current_posted.to_html(), df_current_pending.to_html()
+    df_current_posted_styled = df_current_posted.style.set_caption('Posted').set_table_styles(tableStyles()).set_table_attributes('border="1" class="dataframe table table-hover table-bordered"')
+    df_current_pending_styled = df_current_pending.style.set_caption('Pending').set_table_styles(tableStyles()).set_table_attributes('border="1" class="dataframe table table-hover table-bordered"')
+
+    return df_current_posted_styled.render(), df_current_pending_styled.render()
 
 def jumboTable(data, date, exclusions, hawk_mode):
     df = json2pandaClean(data, exclusions)
@@ -653,7 +678,10 @@ def jumboTable(data, date, exclusions, hawk_mode):
     df_posted_tidy = df_posted_tidy.loc[df_posted_tidy['Date'] >= datetime.strptime(date, '%Y-%m-%d').strftime('%m/%d/%y')]
     df_posted_tidy['Amount'] = df_posted_tidy['Amount'].replace( '[\$,)]','', regex=True ).replace( '[(]','-',   regex=True ).astype(float)
     df_posted_tidy = df_posted_tidy.loc[df_posted_tidy.Amount >= 100]
-    return df_posted_tidy.to_html()
+    df_posted_tidy = df_posted_tidy.fillna('-')
+    df_current_jumbo_styled = df_posted_tidy.style.set_caption('Large Transactions').set_table_styles(tableStyles()).set_table_attributes('border="1" class="dataframe table table-hover table-bordered"')
+
+    return df_current_jumbo_styled.render()
 ################ HTML Generation ################
 def chartConvert(chart_link_lists):
     return [htmlGraph(c) for c in chart_link_lists]
@@ -697,80 +725,3 @@ def emailPreview(mail, hawk_mode):
     prev.close()
     return 'Preview File Updated'
 
-
-
-
-
-
-
-########## Plotly Charts ########
-
-# def plotlyTopCategoryNameChart(frame, number):
-#     fig = go.Figure(go.Bar(
-#             x=frame.values.tolist(),
-#             y=frame.index.tolist(),
-#             orientation='h'))
-#     fig.update_layout(
-#         title=category_df.index[i])
-#     filename = 'topCategoryNameBarChart'
-#     py.plot(fig, filename=filename, auto_open=False)
-#     print("Plotly Top Category Name Chart{}% Updated".format(number))
-#     return filename
-
-# def plotlyMonthlyChart(frame):
-#     print('Updating Plotly Monthly Chart')
-#     fig = go.Figure()
-#     fig.add_trace(
-#         go.Bar(
-#             x = frame.index,
-#             y = frame.amount
-#         ))
-#     fig.update_layout(title_text="Monthly Total Spending")
-#     py.plot(fig, filename="HistoricalSpending", auto_open=False)
-#     return 'Plotly Monthly Chart Updated'
-
-# def plotlyCategoryHistory_Update(frame):
-#     print('Updating Plotly Category History Chart')
-#     fig = go.Figure()
-#     fig.add_trace(
-#         go.Bar(
-#             y = frame.index,
-#             x = frame.amount,
-#             orientation='h'
-#         ))
-#     fig.update_layout(title_text="Historical Spending by Category")
-#     py.plot(fig, filename="ALLMonthCategory.html", auto_open=False)
-#     return 'Plotly Category History Chart Updated'
-
-# def generate_HTML(balance_chase, balance_schwab, charts_tables, chase_total, schwab_total, cap1_total, balance_great_lakes, balance_cap_one, topCatHTML):
-#     # Create the jinja2 environment.
-#     # Notice the use of trim_blocks, which greatly helps control whitespace.
-#     j2_env = Environment(loader=FileSystemLoader('./templates'),
-#                          trim_blocks=True)
-#     template_ready = j2_env.get_template('newhawk.html').render(
-#         Date=today_str,
-#         Chase_Balance=balance_chase,
-#         Schwab_Balance=balance_schwab,
-#         charts_and_tables=charts_tables,
-#         Chase_Spent=chase_total,
-#         Schwab_Spent=schwab_total,
-#         Capital1_Spend=cap1_total,
-#         Capital_One_Balance=balance_cap_one,
-#         Great_Lakes_Balance=balance_great_lakes
-#     )
-#     return template_ready
-
-# def blankHTMLchart(link):
-#     template = (''
-#     '<a href="{link}" target="_blank">' # Open the interactive graph when you click on the image
-#         '<img src="{link}.png">'        # Use the ".png" magic url so that the latest, most-up-to-date image is included
-#     '</a>'
-#     '{link}'                              # Optional caption to include below the graph
-#     '<br>'                                   # Line break
-#     '<a href="{link}" style="color: rgb(190,190,190); text-decoration: none; font-weight: 200;" target="_blank">'
-#         'Click to comment and see the interactive graph'  # Direct readers to Plotly for commenting, interactive graph
-#     '</a>'
-#     '<br>'
-#     '<hr>'                                   # horizontal line
-#     '')
-#     return template

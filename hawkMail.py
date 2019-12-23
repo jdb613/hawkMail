@@ -62,7 +62,8 @@ data = dict(
     greatlakes_total = master_data['lakes_total'],
     spending_progress = helpers.progress(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode),
     chart_pack = {},
-    logo = 'data:image/png;base64,{}'.format(encoded.decode('utf8'))
+    logo = 'data:image/png;base64,{}'.format(encoded.decode('utf8')),
+    tables = []
 )
 
 chart_links = []
@@ -92,17 +93,15 @@ chart_links.append(RC_link)
 posted_tbl, pending_tbl = helpers.transactionTables(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 jumbo_tbl = helpers.jumboTable(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 
+data['tables'].append(posted_tbl)
+data['tables'].append(pending_tbl)
+data['tables'].append(jumbo_tbl)
+
 if hawk_mode == 'production' or hawk_mode == 'testing':
     chart_data = helpers.chartConvert(chart_links)
-    chart_data.append('<h3> Posted </h3>')
-    chart_data.append(posted_tbl)
-    chart_data.append('<h3> Pending </h3>')
-    chart_data.append(pending_tbl)
-    chart_data.append('<h3> Large Transactions </h3>')
-    chart_data.append(jumbo_tbl)
     data['chart_pack']['divs'] = chart_data
 else:
-    data['chart_pack']['divs'] = [CS_link, CMC_link,  RC_link, MS_link, TC_link, CH_link, posted_tbl, pending_tbl, jumbo_tbl]
+    data['chart_pack']['divs'] = [CS_link, CMC_link,  RC_link, MS_link, TC_link, CH_link]
 
 mail_data = helpers.jinjaTEST(data, hawk_mode)
 helpers.emailPreview(mail_data, hawk_mode)

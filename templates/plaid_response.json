@@ -20,7 +20,7 @@
             "account_id": "A4pLoKjamKuVZPJ0jjoKfdjmdg6yKoU6VPRO0",
             "balances": {
                 "available": null,
-                "current": 615.41,
+                "current": 608,
                 "iso_currency_code": "USD",
                 "limit": null,
                 "unofficial_currency_code": null
@@ -45,8 +45,8 @@
         "item_id": "mYaZQjzAgjtK8xbVLLm4u7Bgy31n0MsMPXJmN",
         "webhook": ""
     },
-    "request_id": "Bd4gKrtUweDik98",
-    "total_transactions": 75,
+    "request_id": "NH1WXTsNP8WoQDh",
+    "total_transactions": 74,
     "transactions": [
         {
             "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
@@ -2797,44 +2797,6 @@
             "pending_transaction_id": null,
             "transaction_id": "yy3KQRzO7RiZD0XEQQEpIa3onokQLLsOnmy9q",
             "transaction_type": "place",
-            "unofficial_currency_code": null
-        },
-        {
-            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
-            "account_owner": null,
-            "amount": 150,
-            "category": [
-                "Transfer",
-                "Third Party",
-                "Venmo"
-            ],
-            "category_id": "21010001",
-            "date": "2019-09-23",
-            "iso_currency_code": "USD",
-            "location": {
-                "address": null,
-                "city": null,
-                "lat": null,
-                "lon": null,
-                "state": null,
-                "store_number": null,
-                "zip": null
-            },
-            "name": "Venmo",
-            "payment_meta": {
-                "by_order_of": null,
-                "payee": null,
-                "payer": null,
-                "payment_method": null,
-                "payment_processor": "Braintree",
-                "ppd_id": null,
-                "reason": null,
-                "reference_number": null
-            },
-            "pending": false,
-            "pending_transaction_id": null,
-            "transaction_id": "E81q90xEJ0uMo9Opzzp5C8B7A0OE66fp3VxaB",
-            "transaction_type": "special",
             "unofficial_currency_code": null
         }
     ]
