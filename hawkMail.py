@@ -60,13 +60,16 @@ data = dict(
     capone_total = master_data['cap1_total'],
     balance_great_lakes = master_data['lakes_balance'],
     greatlakes_total = master_data['lakes_total'],
-    spending_progress = helpers.progress(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode),
     chart_pack = {},
     logo = 'data:image/png;base64,{}'.format(encoded.decode('utf8')),
     tables = []
 )
 
+
 chart_links = []
+#Update Guage Chart
+GC_link = helpers.guageChart(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
+chart_links.append(GC_link)
 #Update Cumulative Chart
 CS_link = helpers.cumulativeSum(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 chart_links.append(CS_link)
@@ -90,9 +93,11 @@ RC_link = helpers.relativeCategories(master_data['all_trnsx'], start_of_month, e
 chart_links.append(RC_link)
 #Table HTML
 # pending_HTML = helpers.pendingTable(master_data['all_trnsx'], exclusions)
+pay_table = helpers.payday(master_data['all_trnsx'], 'table')
 posted_tbl, pending_tbl = helpers.transactionTables(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 jumbo_tbl = helpers.jumboTable(master_data['all_trnsx'], start_of_month, exclusions, hawk_mode)
 
+data['tables'].append(pay_table)
 data['tables'].append(posted_tbl)
 data['tables'].append(pending_tbl)
 data['tables'].append(jumbo_tbl)
@@ -101,7 +106,7 @@ if hawk_mode == 'production' or hawk_mode == 'testing':
     chart_data = helpers.chartConvert(chart_links)
     data['chart_pack']['divs'] = chart_data
 else:
-    data['chart_pack']['divs'] = [CS_link, CMC_link,  RC_link, MS_link, TC_link, CH_link]
+    data['chart_pack']['divs'] = [GC_link, CS_link, CMC_link,  RC_link, MS_link, TC_link, CH_link]
 
 mail_data = helpers.jinjaTEST(data, hawk_mode)
 helpers.emailPreview(mail_data, hawk_mode)

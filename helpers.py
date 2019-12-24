@@ -156,9 +156,24 @@ def paymentFinder(json):
     monthly_sum = df.resample('M', loffset=pd.Timedelta(-16, 'd')).sum()
     return monthly_sum
 
-
 def currencyConvert(x):
     return '${:,.2f}'.format(x)
+
+def payday(data, type):
+    paychecks = []
+    for t in data:
+        if t['category_id'] == '21009000':
+            payday = {'date': t['date'],
+                    'amount': t['amount']}
+            paychecks.append(payday)
+    if type == 'list':
+        return paychecks
+    else:
+        pay_df = pd.DataFrame(paychecks)
+        pay_df['amount'] = (pay_df['amount'] * -1)
+        pay_df['amount'] = pay_df['amount'].apply(currencyConvert)
+        pay_df_styled = pay_df.style.set_caption('Income').set_table_styles(tableStyles()).set_table_attributes('border="1" class="dataframe table table-hover table-bordered"').hide_index()
+        return pay_df_styled.render()
 
 
 def tableTidy(df, hawk_mode):
@@ -293,34 +308,38 @@ def getData(environment, exclusions):
     return master_data
 
 ############## Data Vizualization ##############
-def progress(json, date, exclusions, hawk_mode):
+def guageChart(json, startdate, exclusions, hawk_mode):
+    paychecks = payday(json, 'list')
+    month_pay = (paychecks[0]['amount'] + paychecks[1]['amount']) * -1
+    last_month_start = datetime.strptime(startdate, '%Y-%m-%d') - timedelta(days=30)
+    relative_date = date.today() - timedelta(days=30)
+
     lcl_df = json2pandaClean(json, exclusions)
     lcl_df = lcl_df.loc[lcl_df.pending == False]
+    this_month_df = lcl_df.loc[startdate:]
+    last_month_df = lcl_df.loc[last_month_start:relative_date]
+    rel_total = last_month_df['amount'].sum()
     monthly_spending_df, URL = monthlySpending(json, exclusions, hawk_mode, 'No')
-    print('*** Monthly Spending Progress ***')
-    print(monthly_spending_df)
     three_mnth_trailing = monthly_spending_df[-3:]
-    print('3 Month Trailing')
-    print(three_mnth_trailing)
     threeMave = three_mnth_trailing.mean()
-    print('T3M Spending: ', threeMave)
-    this_month_df = lcl_df.loc[date:]
-    print('Total Spending this Month: ', this_month_df['amount'].sum())
-    dec = this_month_df['amount'].sum()/threeMave * 100
-    dec_rez = int(round(dec['amount']))
-    # rpct = f'{(100 - dec_rez):.2f}' + '%'
-    # pct = f'{dec_rez:.2f}' + '%'
 
-    pct = dec_rez
-    rpct = 100 - dec_rez
-    progHTML = '<td bgcolor="#f83f83" style="width:'
-    progHTML += str(pct)
-    progHTML += '%; background-color:#f83f83; float:left; height:15px;text-align: center;">'
-    progHTML += str(pct)
-    progHTML += '%</td><td bgcolor="#cccccc" style="width:'
-    progHTML += str(rpct)
-    progHTML += '%; background-color:#cccccc; float:left; height:15px;"></td>'
-    return progHTML
+    print('Updating Plotly Guage Chart')
+    fig = go.Figure(go.Indicator(
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        value = this_month_df['amount'].sum(),
+        mode = "gauge+number+delta",
+        title = {'text': "Spending"},
+        delta = {'reference': rel_total},
+        gauge = {'axis': {'range': [None, month_pay]},
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': threeMave.values[0]}}))
+    try:
+        if hawk_mode == 'sandbox' or hawk_mode == 'local_testing':
+                URL = plotly.offline.plot(fig, include_plotlyjs=True, output_type='div')
+        else:
+            URL = py.plot(fig, filename="GuageChart", auto_open=False)
+        return URL
+    except Exception as e:
+        return '{}% Chart Update Error'.format("GuageChart")
 
 def cumulativeSum(data, date, exclusions, hawk_mode):
     df = json2pandaClean(data, exclusions)

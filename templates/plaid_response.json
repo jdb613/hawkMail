@@ -4,8 +4,8 @@
         {
             "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
             "balances": {
-                "available": 862.25,
-                "current": 862.25,
+                "available": 799.25,
+                "current": 799.25,
                 "iso_currency_code": "USD",
                 "limit": null,
                 "unofficial_currency_code": null
@@ -20,7 +20,7 @@
             "account_id": "A4pLoKjamKuVZPJ0jjoKfdjmdg6yKoU6VPRO0",
             "balances": {
                 "available": null,
-                "current": 608,
+                "current": 597.74,
                 "iso_currency_code": "USD",
                 "limit": null,
                 "unofficial_currency_code": null
@@ -45,9 +45,46 @@
         "item_id": "mYaZQjzAgjtK8xbVLLm4u7Bgy31n0MsMPXJmN",
         "webhook": ""
     },
-    "request_id": "NH1WXTsNP8WoQDh",
-    "total_transactions": 74,
+    "request_id": "W8VHg17VbvZLGW2",
+    "total_transactions": 75,
     "transactions": [
+        {
+            "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
+            "account_owner": null,
+            "amount": 63,
+            "category": [
+                "Food and Drink",
+                "Restaurants"
+            ],
+            "category_id": "13005000",
+            "date": "2019-12-23",
+            "iso_currency_code": "USD",
+            "location": {
+                "address": null,
+                "city": null,
+                "lat": null,
+                "lon": null,
+                "state": "NY",
+                "store_number": null,
+                "zip": null
+            },
+            "name": "CITIBAN0009492 1330 1ST",
+            "payment_meta": {
+                "by_order_of": null,
+                "payee": null,
+                "payer": null,
+                "payment_method": null,
+                "payment_processor": null,
+                "ppd_id": null,
+                "reason": null,
+                "reference_number": null
+            },
+            "pending": false,
+            "pending_transaction_id": null,
+            "transaction_id": "ZYeDxyNPvytxrPEKnnO7sBjZ6w5ek8FRMMxdm",
+            "transaction_type": "place",
+            "unofficial_currency_code": null
+        },
         {
             "account_id": "vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX",
             "account_owner": null,
