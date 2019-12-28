@@ -143,6 +143,7 @@ def tidy_df(df, hawk_mode):
         df['account_id'] = df['account_id'].map({'LOgERxzqrNFLPZdyNx7oFb9JwX39wzU05vVvd': 'Chase', 'vqmBXOzaoOuxNRe533YbhrV4r0NqELCmZr5vX': 'Schwab'})
     df=df.rename(columns = {'account_id':'account'})
     tdfst = df[['account', 'amount', 'name', 'category_0', 'category_1', 'category_2']]
+    tdfst = tdfst[tdfst.amount != 20675]
     #df.index = df.index.strftime('%m/%d/%y')
     return tdfst
 
@@ -316,7 +317,7 @@ def guageChart(json, startdate, exclusions, hawk_mode):
 
     lcl_df = json2pandaClean(json, exclusions)
     lcl_df = lcl_df.loc[lcl_df.pending == False]
-    this_month_df = lcl_df.loc[startdate:]
+    this_month_df = lcl_df.loc[:startdate]
     last_month_df = lcl_df.loc[last_month_start:relative_date]
     rel_total = last_month_df['amount'].sum()
     monthly_spending_df, URL = monthlySpending(json, exclusions, hawk_mode, 'No')
@@ -344,7 +345,7 @@ def guageChart(json, startdate, exclusions, hawk_mode):
 def cumulativeSum(data, date, exclusions, hawk_mode):
     df = json2pandaClean(data, exclusions)
     df = df.loc[df.pending == False]
-    month_trnsx = df.loc[df.index >= date]
+    month_trnsx = df.loc[:date]
     month_trnsx1 = month_trnsx.resample('D')['amount'].sum().reset_index()
     month_trnsx1['CUMSUM'] = month_trnsx1['amount'].cumsum()
     month_trnsx1 = month_trnsx1.set_index('date')
@@ -463,7 +464,7 @@ def curMonthCategories(data, date, exclusions, hawk_mode):
     df1 = json2pandaClean(data, exclusions)
     df1 = df1.loc[df1.pending == False]
     print('*** Current Month Category Before: ', len(df1))
-    cat_df = df1.loc[df1.index >= date]
+    cat_df = df1.loc[:date]
     print('*** Current Month Category After: ', len(cat_df))
     cat_df = cat_df.groupby('category_1')["amount"].sum()
     df_fram = cat_df.to_frame()
@@ -497,7 +498,7 @@ def categorySubplots(data, date, exclusions, hawk_mode):
     df = df.loc[df.pending == False]
     df1 = drop_columns(df)
     df2 = tidy_df(df1, hawk_mode)
-    df3 = df2.loc[monthStart():]
+    df3 = df2.loc[:monthStart()]
     category_df = df3.groupby('category_0')['amount'].sum().nlargest(5)
     print('**** Top Categories This Month ***')
     print(category_df.head())
@@ -618,7 +619,7 @@ def relativeCategories(data, date, exclusions, hawk_mode):
 
     df_mean = df1.groupby([pd.Grouper(freq='M'), 'category_1'])['amount'].mean().unstack().mean(axis=0)
 
-    df_current = df1.loc[date:]
+    df_current = df1.loc[:date]
     df_current = df_current.groupby('category_1')['amount'].mean()
 
     combined = pd.concat([df_current, df_mean], axis=1, sort=True).dropna()
