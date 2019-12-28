@@ -618,7 +618,7 @@ def relativeCategories(data, date, exclusions, hawk_mode):
 
     df_mean = df1.groupby([pd.Grouper(freq='M'), 'category_1'])['amount'].mean().unstack().mean(axis=0)
 
-    df_current = df1.loc['2019-10-15':]
+    df_current = df1.loc[date:]
     df_current = df_current.groupby('category_1')['amount'].mean()
 
     combined = pd.concat([df_current, df_mean], axis=1, sort=True).dropna()
