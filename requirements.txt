@@ -5,7 +5,7 @@ flatten-json==0.1.7
 idna==2.8
 Jinja2==2.10.3
 MarkupSafe==1.1.1
-numpy==1.17.3
+numpy==1.22.0
 pandas==0.25.2
 plaid-python==3.4.0
 plotly==4.2.1
