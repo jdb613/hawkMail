@@ -1,0 +1,21 @@
+{
+  "accounts": [
+    {
+      "account_id": "sample-account",
+      "name": "Sample Account",
+      "balances": {
+        "current": 100.0
+      }
+    }
+  ],
+  "transactions": [
+    {
+      "account_id": "sample-account",
+      "transaction_id": "sample-transaction",
+      "name": "Example Purchase",
+      "amount": 12.34,
+      "date": "2020-01-01"
+    }
+  ],
+  "total_transactions": 1
+}

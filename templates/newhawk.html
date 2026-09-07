@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Tomohawk</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body style="margin: 0; padding: 0;">
+
+  <table border="0" id="mainContainer" align="center" width="600" cellpadding="0" cellspacing="0"  bgcolor="#E5DFDF">
+    <tr>
+        <td style="padding: 10px 0 30px 0;">
+          <table align="center" border="0" id="logoContainer" cellpadding="0" cellspacing="0" width="100%" style="border: 1px solid #E5DFDF; border-collapse: collapse;">
+            <tr>
+              <td align="left" bgcolor="#E5DFDF" style="padding: 10px 0 10px 0; color: #6BA8A9; font-size: 20px; font-family: Arial, sans-serif;">
+
+                <a href='https://hawkdash.herokuapp.com/'>Dash</a>
+
+            </td>
+              <td align="right" bgcolor="#E5DFDF" style="padding: 10px 0 10px 0; color: #6BA8A9; font-size: 20px; font-family: Arial, sans-serif;">
+
+                {{ jinja_data.date }}
+
+            </td>
+          </tr>
+          <tr>
+            <td align="center" bgcolor="#E5DFDF" style="padding: 10px 0 10px 0; color: #153643; font-size: 28px; font-weight: bold; font-family: Arial, sans-serif;">
+              <img src={{ jinja_data.logo }} alt="Tomohawk" width="25%" height="100" style="display: block;" />
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr>
+      <td bgcolor="#94BOB7" width="75%" style="padding: 10px 0px 10px 0px;">
+        <table border="0" id="balancesContainer" cellpadding="0" cellspacing="0" >
+          <tr>
+
+
+            <td width="15%">
+              <table border="1" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                <td width="100%" height="50"></td>
+                </tr>
+                <tr>
+                <td align="center"> Balance </td>
+                </tr>
+                <tr>
+                  <td align="center"> Spent </td>
+                </tr>
+                </table>
+            </td>
+
+            <td style="font-size: 0; line-height: 0;" width="1%">
+            &nbsp;
+          </td>
+
+            <td width="20%" valign="top">
+              <table border="1" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center">
+                    <a href="https://logo-logos.com/chase-bank-logo-418.html">
+                                            <img src="https://logo-logos.com/wp-content/uploads/2016/10/Chase_Bank_logo_logotype.png" alt="Chase Bank logo, logotype"  width="75%" height="50"/>
+                                        </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    {{jinja_data.balance_chase}}
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    {{jinja_data.chase_total}}
+                  </td>
+                </tr>
+
+          </tr>
+          </table>
+          </td>
+
+          <td style="font-size: 0; line-height: 0;" width="1%">&nbsp;
+          </td>
+
+
+          <td width="20%" valign="top">
+            <table border="1" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td align="center">
+                  <a href="https://www.logosurfer.com/wp-content/uploads/2018/03/charles-schwab-logo_0.png" target="_blank">
+                                <img src="https://www.logosurfer.com/wp-content/uploads/2018/03/charles-schwab-logo_0.png"  alt="Charles Schwab Logo" width="75%" height="50"/>
+                            </a>
+
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  {{jinja_data.balance_schwab}}
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  {{jinja_data.schwab_total}}
+                </td>
+              </tr>
+            </table>
+          </td>
+
+          <td style="font-size: 0; line-height: 0;" width="1%">
+                  &nbsp;
+                </td>
+          <td width="20%" valign="top">
+            <table border="1" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td align="center">
+                  <a href="https://www.logosurfer.com/wp-content/uploads/2018/03/capital-one-logo_0.png" target="_blank">
+                            <img src="https://www.logosurfer.com/wp-content/uploads/2018/03/capital-one-logo_0.png"  alt="Capital One Logo" width="100%" height="50"/>
+                            </a>
+                </td>
+              </tr>
+
+              <!-- <tr>
+                <td style="font-size: 0; line-height: 0;" width="20">
+                  &nbsp;
+                </td>
+              </tr> -->
+              <tr>
+                <td align="center">
+                  {{jinja_data.balance_cap_one}}
+
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  {{jinja_data.capone_total}}
+                </td>
+              </tr>
+            </table>
+          </td>
+
+          <td style="font-size: 0; line-height: 0;" width="1%">&nbsp;
+          </td>
+
+          <td width="20%" valign="top">
+            <table border="1" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td align="center">
+                  <a href="https://www.logosurfer.com/wp-content/uploads/2018/03/capital-one-logo_0.png" target="_blank">
+                                    <img src="https://cdn.studentloanhero.com/wp-content/uploads/great-lakes-student-loans.jpeg"  alt="Capital One Logo" width="75%" height="50"/>
+                                </a>
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  {{jinja_data.balance_great_lakes}}
+
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  {{jinja_data.greatlakes_total}}
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td style="font-size: 0; line-height: 0;" width="1%">
+            &nbsp;
+          </td>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" bgcolor="#E5DFDF" width="25%" style="padding: 40px 10px 40px 10px;">
+          <table style="border:0;" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+            <tr>
+              <td align="center" bgcolor="#E5DFDF">
+                Spending Progress
+              </td>
+            </tr>
+              <tr>
+                      {{jinja_data.spending_progress}}
+
+                </tr>
+              </tbody>
+              </table>
+      </td>
+  </tr>
+  <tr>
+    <td bgcolor="#E5DFDF" style="padding: 5px 5px 5px 5px;" width="100%" align="center">
+        <table border="0" id="chartContainer" cellpadding="0" cellspacing="0" width="100%">
+                    {% for div in jinja_data.chart_pack.divs %}
+                                <tr><td></td></tr>
+                                <tr>
+                                    {{ div }}
+                                </tr>
+                                <tr>
+                                  <td style="font-size: 0; line-height: 0;" width="20">&nbsp;</td>
+                                </tr>
+                    {% endfor %}
+        </table>
+    </td>
+</tr>
+<tr>
+  <td bgcolor="#E5DFDF" style="padding: 5px 5px 5px 5px;" width="100%" align="center">
+    <table border="0" id="chartContainer" cellpadding="0" cellspacing="0" width="100%">
+                  {% for table in jinja_data.tables %}
+                    <tr><td></td></tr>
+                    <tr>
+                        {{ table }}
+                    </tr>
+                    <tr>
+                      <td style="font-size: 0; line-height: 0;" width="20">&nbsp;</td>
+                    </tr>
+                    {% endfor %}
+        </table>
+    </td>
+</tr>
+
+  </table>
+</body>
+
+</html>
+
